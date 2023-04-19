@@ -161,7 +161,7 @@ class Cache:
 
     def parse_input(self, input_stream):
         # Parse the input stream of memory accesses
-        ////input_stream = input_stream.splitlines()
+        
         
      
     def output_cache_status(self):

@@ -86,6 +86,7 @@ class Cache:
             if cache_block and cache_block["valid"]:
                 # Cache hit: store the data and exit the loop
                 data = cache_block["data"][block_offset]
+                self.update_lru(layer, cache_set_index, cache_block_index)
                 break
 
         # If data is found in a higher-level cache, load it into all lower-level caches
@@ -140,9 +141,11 @@ class Cache:
             elif self.write_policy == "write-through" and self.allocation_policy == "non-write-allocate":
                 main_memory[address] = data
 
-    def update_lru(self, ...):
-        pass
-        # Update the LRU information
+    def update_lru(self, layer, cache_set_index, block_index):
+        for block in layer["sets"][cache_set_index]:
+            block["lru_counter"] += 1
+
+        layer["sets"][cache_set_index][block_index]["lru_counter"] = 0
 
     def parse_input(self, input_stream):
         pass

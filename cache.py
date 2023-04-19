@@ -1,3 +1,4 @@
+import math
 class Cache:
     def __init__(self, num_layers, cache_sizes, access_latencies, block_size, set_associativities, write_policy, allocation_policy):
         self.num_layers = num_layers
@@ -48,33 +49,99 @@ class Cache:
             "lru_counter": 0,
             "data": bytearray(self.block_size)  # Initialize the data field as a bytearray of the specified block size
     }
-        
+    
+    def load_data_into_cache(self, layer, tag, cache_set_index, data):
+        cache_set = layer["sets"][cache_set_index]
+
+        # Try to find an available (not valid) cache block
+        available_block = None
+        for block in cache_set:
+            if not block["valid"]:
+                available_block = block
+                break
+
+        # If no available block is found, evict the LRU block
+        if available_block is None:
+            lru_block_index = min(enumerate(cache_set), key=lambda x: x[1]["last_used"])[0]
+            available_block = cache_set[lru_block_index]
+
+        # Update the available block with the new data and tag
+        available_block["tag"] = tag
+        available_block["valid"] = True
+        available_block["dirty"] = False
+        available_block["data"] = data
+        available_block["last_used"] = self.current_time
+
+    
     def read(self, address):
     # Calculate the tag, index, and offset from the address
         tag, cache_set_index, block_offset = self.parse_address(address)
-
         access_latency = 0
+        data = None
 
-        for layer in self.cache_hierarchy:
+        for layer in reversed(self.cache_hierarchy):  # Traverse from highest to lowest level
             access_latency += layer["latency"]
-
-            # Perform cache operations to find the cache block with the given tag and index
             cache_block = self.find_cache_block(tag, cache_set_index, layer)
 
-            # If the cache block is found and valid, return the requested data and access latency
             if cache_block and cache_block["valid"]:
-                return cache_block["data"][block_offset], access_latency
+                # Cache hit: store the data and exit the loop
+                data = cache_block["data"][block_offset]
+                break
 
-        # If not found in cache, read the data from memory (not shown in this example)
-        # Add the memory access latency to the access latency
-        access_latency += self.memory_access_latency
+        # If data is found in a higher-level cache, load it into all lower-level caches
+        if data is not None:
+            for layer in self.cache_hierarchy:
+                if not self.find_cache_block(tag, cache_set_index, layer):
+                    self.load_data_into_cache(layer, tag, cache_set_index, data)
+                else:
+                    break
+        else:
+            # If not found in any cache, read the data from memory
+            access_latency += self.memory_access_latency
+            data = ...  # Read the data corresponding to the address
 
-        return memory_data, access_latency
+            # Load data into all cache levels
+            for layer in self.cache_hierarchy:
+                self.load_data_into_cache(layer, tag, cache_set_index, data)
+
+        return data, access_latency
 
 
-    def write(self, address, arriving_time):
-        pass
+    def write(self, address, data):
         # Implement write operation
+        tag, cache_set_index, block_offset = self.parse_address(address)
+
+        write_hit = False
+        for layer in self.cache_hierarchy:
+            cache_block = self.find_cache_block(tag, cache_set_index, layer)
+
+            if cache_block and cache_block["valid"]:
+                write_hit = True
+
+                if self.write_policy == "write-back":
+                    # Update the cache block and set the dirty bit
+                    cache_block["data"][block_offset] = data
+                    cache_block["dirty"] = True
+                elif self.write_policy == "write-through":
+                    # Update the cache block and write to memory
+                    cache_block["data"][block_offset] = data
+                    # Write the data to memory (assuming a memory write function)
+                    self.write_to_memory(address, data)
+
+        if not write_hit:
+            if self.write_policy == "write-back" and self.allocation_policy == "write-allocate":
+                # Allocate space in cache for the new data
+                for layer in self.cache_hierarchy:
+                    self.load_data_into_cache(layer, tag, cache_set_index, data)
+
+                # Write the data to the newly allocated space in cache
+                cache_block = self.find_cache_block(tag, cache_set_index, self.cache_hierarchy[0])
+                cache_block["data"][block_offset] = data
+                cache_block["dirty"] = True
+            elif self.write_policy == "write-through" and self.allocation_policy == "non-write-allocate":
+                # Write the data directly to memory without allocating space in the cache
+                # Assuming a memory write function
+                self.write_to_memory(address, data)
 
     def update_lru(self, ...):
         pass

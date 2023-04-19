@@ -13,7 +13,8 @@ class Cache:
         self.miss_counters = [0] * num_layers
         self.read_finish_times = []
         self.block_size = block_size
-
+        memory_access_latency = 100
+        
         # Calculate the number of bits needed for the block offset
         self.block_offset_bits = int(log2(block_size))
 
@@ -81,7 +82,7 @@ class Cache:
 
         for layer in reversed(self.cache_hierarchy):  # Traverse from highest to lowest level
             access_latency += layer["latency"]
-            cache_block = self.find_cache_block(tag, cache_set_index, layer)
+            cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
 
             if cache_block and cache_block["valid"]:
                 # Cache hit: store the data and exit the loop
@@ -159,8 +160,9 @@ class Cache:
         layer["sets"][cache_set_index][block_index]["lru_counter"] = 0
 
     def parse_input(self, input_stream):
-        pass
         # Parse the input stream of memory accesses
-
+        ////input_stream = input_stream.splitlines()
+        
+     
     def output_cache_status(self):
         # Output cache status image, hit/miss rates, and finish time of read accesses

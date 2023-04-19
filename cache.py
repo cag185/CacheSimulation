@@ -50,17 +50,26 @@ class Cache:
     }
         
     def read(self, address):
-        # Implement read operation
-        
-        # Calculate the tag, index, and offset from the address
+    # Calculate the tag, index, and offset from the address
         tag, cache_set_index, block_offset = self.parse_address(address)
 
-        # Perform cache operations to find the cache block with the given tag and index
-        cache_block = self.find_cache_block(tag, cache_set_index)
+        access_latency = 0
 
-        # If the cache block is found and valid, return the requested byte
-        if cache_block and cache_block["valid"]:
-            return cache_block["data"][block_offset]
+        for layer in self.cache_hierarchy:
+            access_latency += layer["latency"]
+
+            # Perform cache operations to find the cache block with the given tag and index
+            cache_block = self.find_cache_block(tag, cache_set_index, layer)
+
+            # If the cache block is found and valid, return the requested data and access latency
+            if cache_block and cache_block["valid"]:
+                return cache_block["data"][block_offset], access_latency
+
+        # If not found in cache, read the data from memory (not shown in this example)
+        # Add the memory access latency to the access latency
+        access_latency += self.memory_access_latency
+
+        return memory_data, access_latency
 
 
     def write(self, address, arriving_time):

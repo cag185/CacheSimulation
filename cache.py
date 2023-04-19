@@ -73,7 +73,7 @@ class Cache:
         available_block["last_used"] = self.current_time
 
     
-    def read(self, address):
+    def read(self, address,main_memory):
     # Calculate the tag, index, and offset from the address
         tag, cache_set_index, block_offset = self.parse_address(address)
         access_latency = 0
@@ -98,7 +98,7 @@ class Cache:
         else:
             # If not found in any cache, read the data from memory
             access_latency += self.memory_access_latency
-            data = ...  # Read the data corresponding to the address
+            data = main_memory.get(address)
 
             # Load data into all cache levels
             for layer in self.cache_hierarchy:
@@ -107,7 +107,7 @@ class Cache:
         return data, access_latency
 
 
-    def write(self, address, data):
+    def write(self, address, data,main_memory):
         # Implement write operation
         tag, cache_set_index, block_offset = self.parse_address(address)
 
@@ -126,23 +126,18 @@ class Cache:
                     # Update the cache block and write to memory
                     cache_block["data"][block_offset] = data
                     # Write the data to memory (assuming a memory write function)
-                    self.write_to_memory(address, data)
+                    main_memory[address] = data
 
         if not write_hit:
             if self.write_policy == "write-back" and self.allocation_policy == "write-allocate":
-                # Allocate space in cache for the new data
+            # Allocate space in cache for the new data
                 for layer in self.cache_hierarchy:
                     self.load_data_into_cache(layer, tag, cache_set_index, data)
 
-                # Write the data to the newly allocated space in cache
-                cache_block = self.find_cache_block(tag, cache_set_index, self.cache_hierarchy[0])
-                cache_block["data"][block_offset] = data
-                cache_block["dirty"] = True
             elif self.write_policy == "write-through" and self.allocation_policy == "non-write-allocate":
-                # Write the data directly to memory without allocating space in the cache
-                # Assuming a memory write function
-                self.write_to_memory(address, data)
-
+            # Write the data directly to memory without allocating space in the cache
+                main_memory[address] = data
+            
     def update_lru(self, ...):
         pass
         # Update the LRU information

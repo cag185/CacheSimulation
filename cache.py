@@ -114,7 +114,7 @@ class Cache:
 
         write_hit = False
         for layer_idx, layer in enumerate(self.cache_hierarchy):
-            cache_block = self.find_cache_block(tag, cache_set_index, layer)
+            cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
 
             if cache_block and cache_block["valid"]:
                 write_hit = True
@@ -131,7 +131,9 @@ class Cache:
                     cache_block["dirty"] = True
                 elif self.write_policy == "write-through":
                     cache_block["data"][block_offset] = data
-                    main_memory[address] = dataad
+                    main_memory[address] = data
+                    
+                    self.update_lru(layer, cache_set_index, cache_block_index)
 
         if not write_hit:
             if self.write_policy == "write-back" and self.allocation_policy == "write-allocate":
@@ -140,6 +142,15 @@ class Cache:
 
             elif self.write_policy == "write-through" and self.allocation_policy == "non-write-allocate":
                 main_memory[address] = data
+
+
+    def find_cache_block(self, tag, cache_set_index, layer):
+        cache_set = layer["sets"][cache_set_index]
+
+        for block_index, cache_block in enumerate(cache_set):
+            if cache_block["valid"] and cache_block["tag"] == tag:
+                return block_index, cache_block
+        return None, None
 
     def update_lru(self, layer, cache_set_index, block_index):
         for block in layer["sets"][cache_set_index]:

@@ -1,4 +1,5 @@
 import math
+import os # module to load in data from the system
 class Cache:
     def __init__(self, num_layers, cache_sizes, access_latencies, block_size, set_associativities, write_policy, allocation_policy, input_stream):
         self.num_layers = num_layers
@@ -148,13 +149,8 @@ class Cache:
     # input data is instruction (r/w), address, and the arrival time
     def parse_input(self, input_stream):
         # Parse the input stream of memory accesses
-        for inp in input_stream:
-            instructionChar = inp[0]
-            # not sure if this works for any instruction, may need to update
-            stream_len = len(inp)
-            arr_time = inp[stream_len]
-            # data is all the bits between
-            address = inp[1:stream_len-1]
+        for line in input_stream:
+            instructionChar, address, arr_time = line
 
             # based on the operation call a different function
             if(instructionChar == 'r'):

@@ -1,5 +1,5 @@
 # Code written by Caleb Gibson and Peter Bertola
-
+import cache.py 
 
 print("Welcome to Caleb and Peter's Cache simulation!")
 print('Before we can begin, lets set up the following settings: ')
@@ -60,9 +60,13 @@ def main():
                 temp_setting = int(input())
         # done with settings
         busy = True
+    # instantiate the cache
+    # descrency between the class and the inputs from the user -- write policy and allocation policy should be one variable
+    cache1 = Cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_allocation_style)
 
 # run the program
 main()
+
 
 
     

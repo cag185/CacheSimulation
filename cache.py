@@ -1,6 +1,6 @@
 import math
 class Cache:
-    def __init__(self, num_layers, cache_sizes, access_latencies, block_size, set_associativities, write_policy, allocation_policy):
+    def __init__(self, num_layers, cache_sizes, access_latencies, block_size, set_associativities, write_policy, allocation_policy, input_stream):
         self.num_layers = num_layers
         self.cache_sizes = cache_sizes
         self.access_latencies = access_latencies
@@ -14,7 +14,7 @@ class Cache:
         self.read_finish_times = []
         self.read_finish_latencies = []
         self.block_size = block_size
-
+        self.input_stream = input_stream # given to the class from the main function where we instantiate the class
         # Calculate the number of bits needed for the block offset
         self.block_offset_bits = int(log2(block_size))
 

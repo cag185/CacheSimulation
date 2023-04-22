@@ -12,6 +12,7 @@ class Cache:
         self.hit_counters = [0] * num_layers
         self.miss_counters = [0] * num_layers
         self.read_finish_times = []
+        self.read_finish_latencies = []
         self.block_size = block_size
         memory_access_latency = 100
         
@@ -74,7 +75,7 @@ class Cache:
         available_block["last_used"] = self.current_time
 
     
-    def read(self, address,main_memory):
+    def read(self, address, main_memory):
     # Calculate the tag, index, and offset from the address
         tag, cache_set_index, block_offset = self.parse_address(address)
         access_latency = 0
@@ -109,7 +110,7 @@ class Cache:
         return data, access_latency
 
 
-    def write(self, address, data,main_memory):
+    def write(self, address, data, main_memory):
     # Implement write operation
         tag, cache_set_index, block_offset = self.parse_address(address)
 
@@ -132,6 +133,7 @@ class Cache:
                     cache_block["dirty"] = True
                 elif self.write_policy == "write-through":
                     cache_block["data"][block_offset] = data
+                    main_memory[address] = data
                     main_memory[address] = data
                     
                     self.update_lru(layer, cache_set_index, cache_block_index)
@@ -159,10 +161,36 @@ class Cache:
 
         layer["sets"][cache_set_index][block_index]["lru_counter"] = 0
 
+    # input data is instruction (r/w), address, and the arrival time
     def parse_input(self, input_stream):
         # Parse the input stream of memory accesses
-        
-        
-     
+        for inp in input_stream:
+            instructionChar = inp[0]
+            # not sure if this works for any instruction, may need to update
+            stream_len = len(inp)
+            arr_time = inp[stream_len]
+            # data is all the bits between
+            address = inp[1:stream_len-1]
+
+            # based on the operation call a different function
+            if(instructionChar == 'r'):
+                print('read instruction')
+                read_results = self.read(address, main_memory)
+                read_finish_times.append (arr_time + read_results.access_latency) # append the time taken to get a hit
+                read_finish_latencies.append(read_results.access_latency) # append the time taken to get a hit without the initial time
+                # output
+                self.output_cache_status()
+
+            elif(instructionChar == 'w'):
+                print('write instruction')
+                # self.write(address, ) -- having issue here, not sure what the data will be that needs to be written to
+            # after the input was parsed, call the output function
+
+
+    # Rather than print after every read, might be a better idea to save the delays and cache misses/hit ratio until all the instructions are read
     def output_cache_status(self):
         # Output cache status image, hit/miss rates, and finish time of read accesses
+        print('-----The finsish time of each read, and its corresponding latency-----')
+        for hit in range(read_finish_times):
+            print('Finish time of read ${hit}: ', self.read_finish_times[hit])
+            print('Total latency of read ${hit}: ', self.read_finish_latencies[hit])

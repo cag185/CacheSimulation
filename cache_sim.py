@@ -106,7 +106,6 @@ def main():
 # run the program
 if __name__ == "__main__":
     main()
-#ToDo - Do we need this specific command to run the program vs just calling "main()"?
 
 
     

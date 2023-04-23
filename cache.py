@@ -1,5 +1,5 @@
 import math
-class Cache:
+class cache:
     def __init__(self, num_layers, cache_sizes, access_latencies, block_size, set_associativities, write_policy, allocation_policy):
         self.num_layers = num_layers
         self.cache_sizes = cache_sizes
@@ -35,12 +35,34 @@ class Cache:
                 "sets": {}
             }
 
+            # This code is initializing the cache sets for a given cache layer. It is creating a list
+            # of cache blocks for each set in the layer, where the number of blocks in each set is
+            # equal to the set associativity. The `for` loop iterates over the range of `num_sets` in
+            # the layer, and for each set index, it creates a list of cache blocks using a list
+            # comprehension. The list comprehension creates a list of `associativity` number of cache
+            # blocks using the `create_cache_block()` method. The resulting list of cache blocks is
+            # then assigned to the `sets` dictionary for the corresponding set index in the layer.
             for set_index in range(layer["num_sets"]):
                 layer["sets"][set_index] = [self.create_cache_block() for _ in range(layer["associativity"])]
 
             cache_hierarchy.append(layer)
 
         return cache_hierarchy
+
+    def parse_address(self, address):
+        # Calculate the number of bits needed for the index
+        index_bits = int(math.log2(self.cache_hierarchy[0]["num_sets"]))
+
+        # Calculate the mask and shift values for the tag and index
+        tag_shift = self.block_offset_bits + index_bits
+        index_mask = (1 << index_bits) - 1
+
+        # Extract the tag, index, and offset from the address
+        tag = address >> tag_shift
+        cache_set_index = (address >> self.block_offset_bits) & index_mask
+        block_offset = address & ((1 << self.block_offset_bits) - 1)
+
+        return tag, cache_set_index, block_offset
 
     
     def create_cache_block(self):
@@ -53,6 +75,9 @@ class Cache:
     }
     
     def load_data_into_cache(self, layer, tag, cache_set_index, data):
+        """
+        This function loads data into a cache set within a layer.
+        """
         cache_set = layer["sets"][cache_set_index]
 
         # Try to find an available (not valid) cache block
@@ -162,29 +187,56 @@ class Cache:
         layer["sets"][cache_set_index][block_index]["lru_counter"] = 0
 
     # input data is instruction (r/w), address, and the arrival time
-    def parse_input(self, input_stream):
-        # Parse the input stream of memory accesses
-        for inp in input_stream:
-            instructionChar = inp[0]
-            # not sure if this works for any instruction, may need to update
-            stream_len = len(inp)
-            arr_time = inp[stream_len]
-            # data is all the bits between
-            address = inp[1:stream_len-1]
+    # def parse_input(self, input_stream):
+    #     # Parse the input stream of memory accesses
+    #     for inp in input_stream:
+    #         instructionChar = inp[0]
+    #         # not sure if this works for any instruction, may need to update
+    #         stream_len = len(inp)
+    #         arr_time = inp[stream_len]
+    #         # data is all the bits between
+    #         address = inp[1:stream_len-1]
 
-            # based on the operation call a different function
-            if(instructionChar == 'r'):
+    #         # based on the operation call a different function
+    #         if(instructionChar == 'r'):
+    #             print('read instruction')
+    #             read_results = self.read(address, main_memory)
+    #             read_finish_times.append (arr_time + read_results.access_latency) # append the time taken to get a hit
+    #             read_finish_latencies.append(read_results.access_latency) # append the time taken to get a hit without the initial time
+    #             # output
+    #             self.output_cache_status()
+
+    #         elif(instructionChar == 'w'):
+    #             print('write instruction')
+    #             # self.write(address, ) -- having issue here, not sure what the data will be that needs to be written to
+    #         # after the input was parsed, call the output function
+    def parse_input(self, input_stream,main_memory):
+    # Iterate over the input stream line by line
+        for line in input_stream:
+            # Remove any leading/trailing whitespaces and split the line into components
+            components = line.strip().split()
+
+            # Get the instruction, address, and arrival time from the components
+            instruction = components[0]
+            address = int(components[1], 16)  # Assuming the address is in hexadecimal format
+            arrival_time = float(components[2])
+            data_to_write = components[3] if len(components) > 3 else None
+
+            # Process the instruction based on whether it's a read (r) or write (w) operation
+            if instruction == 'r':
                 print('read instruction')
-                read_results = self.read(address, main_memory)
-                read_finish_times.append (arr_time + read_results.access_latency) # append the time taken to get a hit
-                read_finish_latencies.append(read_results.access_latency) # append the time taken to get a hit without the initial time
-                # output
+                data, access_latency = self.read(address, main_memory)
+                self.read_finish_times.append(arrival_time + access_latency)
+                self.read_finish_latencies.append(access_latency)
                 self.output_cache_status()
 
-            elif(instructionChar == 'w'):
+            elif instruction == 'w':
                 print('write instruction')
-                # self.write(address, ) -- having issue here, not sure what the data will be that needs to be written to
-            # after the input was parsed, call the output function
+                # Replace 'data_to_write' with the appropriate data to write
+                self.write(address, data_to_write, main_memory)
+
+    # Output the cache status after processing all instructions
+            self.output_cache_status()
 
 
     # Rather than print after every read, might be a better idea to save the delays and cache misses/hit ratio until all the instructions are read

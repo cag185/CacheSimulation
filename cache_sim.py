@@ -1,10 +1,15 @@
 # Code written by Caleb Gibson and Peter Bertola
+from cache import cache
 
 
-print("Welcome to Caleb and Peter's Cache simulation!")
-print('Before we can begin, lets set up the following settings: ')
+
+# run the program
 def main():
-    # define some variables to be used in the cache sim
+    print("Welcome to Caleb and Peter's Cache simulation!")
+    print('Before we can begin, lets set up the following settings: ')
+
+    # ... (your existing code for gathering user input) ...
+# define some variables to be used in the cache sim
     busy = False
 
     cache_layer_num = 0 # number of levels in cache
@@ -52,17 +57,35 @@ def main():
         print("Write-through with Non-Write-Allocate allocation policy [1].")
         print("Please enter '0' for the first option or '1' for the second: ")
         temp_setting = int(input())
-        if(temp_setting == 1 or temp_setting == 0):
+        if(temp_setting == 1):
             write_allocation_style = temp_setting
         else:
             while ((temp_setting != 0) or (temp_setting != 1)):
                 print("Please enter '0' for the first option or '1' for the second: ")
                 temp_setting = int(input())
+        write_policy = ""
+        allocation_policy = ""
+        if (write_allocation_style == 0):
+            write_policy = "write-back"
+            allocation_policy = "write-allocate"
+        elif(write_allocation_style == 1):
+            write_policy = "write-through"
+            allocation_policy = "non-write-allocate"
         # done with settings
         busy = True
+    # Create a Cache instance with the gathered parameters
+    cache1 = cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_policy, allocation_policy)
+
+    # Read the input stream from a text file
+    input_file_path = "input_stream.txt"  # Replace with your input file path
+    with open(input_file_path, "r") as input_file:
+        input_stream = input_file.readlines()
+
+    # Call the parse_input function of the Cache instance with the input stream
+    cache.parse_input(input_stream)
 
 # run the program
-main()
-
+if __name__ == "__main__":
+    main()
 
     

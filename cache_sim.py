@@ -8,8 +8,6 @@ def main():
     print("Welcome to Caleb and Peter's Cache simulation!")
     print('Before we can begin, lets set up the following settings: ')
 
-    # ... (your existing code for gathering user input) ...
-# define some variables to be used in the cache sim
     busy = False
 
     cache_layer_num = 0 # number of levels in cache

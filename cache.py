@@ -16,7 +16,7 @@ class Cache:
         self.read_finish_latencies = []
         self.block_size = block_size
         self.input_stream = input_stream # given to the class from the main function where we instantiate the class
-        # memory_access_latency = 100 - ToDo What does this need to be set to this value for?
+        memory_access_latency = 100
         
         # Calculate the number of bits needed for the block offset
         self.block_offset_bits = int(log2(block_size))

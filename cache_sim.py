@@ -1,10 +1,14 @@
 # Code written by Caleb Gibson and Peter Bertola
+import cache.py 
+import Caleb_Instruction_Example.txt
+import os # module to open files from the system
 
 
-print("Welcome to Caleb and Peter's Cache simulation!")
-print('Before we can begin, lets set up the following settings: ')
+# run the program
 def main():
-    # define some variables to be used in the cache sim
+    print("Welcome to Caleb and Peter's Cache simulation!")
+    print('Before we can begin, lets set up the following settings: ')
+
     busy = False
 
     cache_layer_num = 0 # number of levels in cache
@@ -52,17 +56,72 @@ def main():
         print("Write-through with Non-Write-Allocate allocation policy [1].")
         print("Please enter '0' for the first option or '1' for the second: ")
         temp_setting = int(input())
-        if(temp_setting == 1 or temp_setting == 0):
+        if(temp_setting == 1):
             write_allocation_style = temp_setting
         else:
             while ((temp_setting != 0) or (temp_setting != 1)):
                 print("Please enter '0' for the first option or '1' for the second: ")
                 temp_setting = int(input())
+        write_policy = ""
+        allocation_policy = ""
+        if (write_allocation_style == 0):
+            write_policy = "write-back"
+            allocation_policy = "write-allocate"
+        elif(write_allocation_style == 1):
+            write_policy = "write-through"
+            allocation_policy = "non-write-allocate"
         # done with settings
         busy = True
+    # Create a Cache instance with the gathered parameters
+    cache1 = cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_policy, allocation_policy)
+
+    # data structure for holding the input stream
+    input_data = []
+
+    # load in the input stream 
+    folder_path = '/Input_Data'
+    # get list of files
+    file_list = os.listdir(folder_path)
+    if (len(file_list) == 1):
+        try :
+            selected_file = file_list[0]
+            with open(os.path.join(folder_path, selected_file), 'r') as f:
+                for line in f:
+                    tokens = line.split
+                    if(len(tokens)  == 3):
+                        data_set = set(tokens) # convert the three data fields into a set
+                        input_data.append(data_set) # add the set to the data structure
+        except:
+            print('something went wrong with opening your data')
+        
+    else:
+        print("ERROR: More than one file in the Input directory. Remove all but one files and try again")
+
+    # instantiate the cache
+    # descrepency between the class and the inputs from the user -- write policy and allocation policy should be one variable
+    cache1 = Cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_allocation_style)
+    cache1.initialize_cache_hierarchy() # intialize the cache with its settings
+    cache1.load_data_into_cache() # not sure if this needs to be called, unsure of params
+    # parse the input data and send it to the cache
+    cache1.parse_input(input_data) # parses the input data and calls the read/write functions
+    cache1.output_cache_status() # outputs important info to the console about the read and write times
+
+#ToDo
+# Commented out this. So far I need the code in the above section so that cache.parseInput() recieves the correct stripped data
+# # run the program
+# main()
+#     # Read the input stream from a text file
+#     input_file_path = "input_stream.txt"  # Replace with your input file path
+#     with open(input_file_path, "r") as input_file:
+#         input_stream = input_file.readlines()
+
+#     # Call the parse_input function of the Cache instance with the input stream
+#     cache.parse_input(input_stream)
 
 # run the program
-main()
+if __name__ == "__main__":
+    main()
+#ToDo - Do we need this specific command to run the program vs just calling "main()"?
 
 
     

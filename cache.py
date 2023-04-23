@@ -247,3 +247,6 @@ class Cache:
         for hit in range(read_finish_times):
             print('Finish time of read ${hit}: ', self.read_finish_times[hit])
             print('Total latency of read ${hit}: ', self.read_finish_latencies[hit])
+
+
+#test

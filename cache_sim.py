@@ -1,12 +1,14 @@
 # Code written by Caleb Gibson and Peter Bertola
-import cache.py 
+from cache import cache
 import Caleb_Instruction_Example.txt
 import os # module to open files from the system
 
-print("Welcome to Caleb and Peter's Cache simulation!")
-print('Before we can begin, lets set up the following settings: ')
+
+# run the program
 def main():
-    # define some variables to be used in the cache sim
+    print("Welcome to Caleb and Peter's Cache simulation!")
+    print('Before we can begin, lets set up the following settings: ')
+
     busy = False
 
     cache_layer_num = 0 # number of levels in cache
@@ -54,14 +56,24 @@ def main():
         print("Write-through with Non-Write-Allocate allocation policy [1].")
         print("Please enter '0' for the first option or '1' for the second: ")
         temp_setting = int(input())
-        if(temp_setting == 1 or temp_setting == 0):
+        if(temp_setting == 1):
             write_allocation_style = temp_setting
         else:
             while ((temp_setting != 0) or (temp_setting != 1)):
                 print("Please enter '0' for the first option or '1' for the second: ")
                 temp_setting = int(input())
+        write_policy = ""
+        allocation_policy = ""
+        if (write_allocation_style == 0):
+            write_policy = "write-back"
+            allocation_policy = "write-allocate"
+        elif(write_allocation_style == 1):
+            write_policy = "write-through"
+            allocation_policy = "non-write-allocate"
         # done with settings
         busy = True
+    # Create a Cache instance with the gathered parameters
+    cache1 = cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_policy, allocation_policy)
 
     # data structure for holding the input stream
     input_data = []
@@ -87,16 +99,14 @@ def main():
 
     # instantiate the cache
     # descrepency between the class and the inputs from the user -- write policy and allocation policy should be one variable
-    cache1 = Cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_allocation_style)
-    cache1.initialize_cache_hierarchy() # intialize the cache with its settings
-    cache1.load_data_into_cache() # not sure if this needs to be called, unsure of params
+    cache1 = Cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_policy, allocation_policy)
     # parse the input data and send it to the cache
     cache1.parse_input(input_data) # parses the input data and calls the read/write functions
-    cache1.output_cache_status() # outputs important info to the console about the read and write times
 
 # run the program
-main()
-
+if __name__ == "__main__":
+    main()
+#ToDo - Do we need this specific command to run the program vs just calling "main()"?
 
 
     

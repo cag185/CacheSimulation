@@ -1,7 +1,7 @@
 import math
 import os # module to load in data from the system
 class Cache:
-    def __init__(self, num_layers, cache_sizes, access_latencies, block_size, set_associativities, write_policy, allocation_policy, input_stream):
+    def __init__(self, num_layers, cache_sizes, access_latencies, block_size, set_associativities, write_policy, allocation_policy):
         self.num_layers = num_layers
         self.cache_sizes = cache_sizes
         self.access_latencies = access_latencies

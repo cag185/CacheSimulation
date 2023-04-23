@@ -1,5 +1,5 @@
 # Code written by Caleb Gibson and Peter Bertola
-import cache.py 
+from cache import cache
 import Caleb_Instruction_Example.txt
 import os # module to open files from the system
 
@@ -99,29 +99,13 @@ def main():
 
     # instantiate the cache
     # descrepency between the class and the inputs from the user -- write policy and allocation policy should be one variable
-    cache1 = Cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_allocation_style)
-    cache1.initialize_cache_hierarchy() # intialize the cache with its settings
-    cache1.load_data_into_cache() # not sure if this needs to be called, unsure of params
+    cache1 = Cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_policy, allocation_policy)
     # parse the input data and send it to the cache
     cache1.parse_input(input_data) # parses the input data and calls the read/write functions
-    cache1.output_cache_status() # outputs important info to the console about the read and write times
-
-#ToDo
-# Commented out this. So far I need the code in the above section so that cache.parseInput() recieves the correct stripped data
-# # run the program
-# main()
-#     # Read the input stream from a text file
-#     input_file_path = "input_stream.txt"  # Replace with your input file path
-#     with open(input_file_path, "r") as input_file:
-#         input_stream = input_file.readlines()
-
-#     # Call the parse_input function of the Cache instance with the input stream
-#     cache.parse_input(input_stream)
 
 # run the program
 if __name__ == "__main__":
     main()
-#ToDo - Do we need this specific command to run the program vs just calling "main()"?
 
 
     

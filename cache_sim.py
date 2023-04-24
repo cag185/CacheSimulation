@@ -22,12 +22,14 @@ def main():
 
     # main memory in the form of an array
     main_mem_path = "MainMemory.txt"
-    main_mem = []
+    main_mem = {}
 
     with open(main_mem_path, "r") as file:
         for line in file:
-            line = line.strip()
-            main_mem.append(line)
+            address, value = line.strip().split()
+
+            if address not in main_mem_dict:
+                main_mem_dict[address] = value
 
     # if the simulation not busy ask for user input
     if(busy == False):

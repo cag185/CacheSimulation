@@ -1,8 +1,7 @@
 # Code written by Caleb Gibson and Peter Bertola
 from cache import cache
-import Caleb_Instruction_Example.txt
+# import Caleb_Instruction_Example.txt
 import os # module to open files from the system
-
 
 # run the program
 def main():
@@ -21,6 +20,14 @@ def main():
     # if write_allocation_style = 1 -- CACHE IS WRITE THROUGH AND NON-WRITE-ALLOCATE
     # otherwise, cache write allocation style has not been set yet
 
+    # main memory in the form of an array
+    main_mem_path = "MainMemory.txt"
+    main_mem = []
+
+    with open(main_mem_path, "r") as file:
+        for line in file:
+            line = line.strip()
+            main_mem.append(line)
 
     # if the simulation not busy ask for user input
     if(busy == False):
@@ -33,6 +40,7 @@ def main():
             print("Please enter the memory size in bytes (ex. 1000, 200000, 1000000) for layer ", cache_level,": ")
             temp_size = int(input()) # retrieve size of cache layer
             cache_layer_size.append(temp_size)
+            main_mem_size += temp_size
         
         # for each layer in the cache, assign a latency
         for cache_level in range(cache_layer_num):
@@ -101,7 +109,7 @@ def main():
     # descrepency between the class and the inputs from the user -- write policy and allocation policy should be one variable
     cache1 = Cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_policy, allocation_policy)
     # parse the input data and send it to the cache
-    cache1.parse_input(input_data) # parses the input data and calls the read/write functions
+    cache1.parse_input(input_data, main_mem) # parses the input data and calls the read/write functions
 
 # run the program
 if __name__ == "__main__":

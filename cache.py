@@ -15,7 +15,6 @@ class Cache:
         self.read_finish_times = []
         self.read_finish_latencies = []
         self.block_size = block_size
-        self.input_stream = input_stream # given to the class from the main function where we instantiate the class
         memory_access_latency = 100
         
         # Calculate the number of bits needed for the block offset

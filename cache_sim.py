@@ -1,5 +1,5 @@
 # Code written by Caleb Gibson and Peter Bertola
-from cache import cache
+from cache import Cache
 # import Caleb_Instruction_Example.txt
 import os # module to open files from the system
 
@@ -111,7 +111,7 @@ def main():
     # descrepency between the class and the inputs from the user -- write policy and allocation policy should be one variable
     cache1 = Cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_policy, allocation_policy)
     # parse the input data and send it to the cache
-    cache1.parse_input(input_data, main_mem) # parses the input data and calls the read/write functions
+    cache1.parse_input(input_data, main_mem_dict) # parses the input data and calls the read/write functions
 
 # run the program
 if __name__ == "__main__":

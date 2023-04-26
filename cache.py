@@ -1,4 +1,5 @@
 import math
+from math import log2
 import os # module to load in data from the system
 class Cache:
     def __init__(self, num_layers, cache_sizes, access_latencies, block_size, set_associativities, write_policy, allocation_policy):

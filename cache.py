@@ -57,6 +57,7 @@ class Cache:
         return cache_hierarchy
 
     def parse_address(self, address):
+        address = int(address)
         # Calculate the number of bits needed for the index
         index_bits = int(math.log2(self.cache_hierarchy[0]["num_sets"]))
 
@@ -104,7 +105,7 @@ class Cache:
         available_block["valid"] = True
         available_block["dirty"] = False
         available_block["data"] = data
-        available_block["last_used"] = self.current_time
+        available_block["lru_counter"] = 0
 
     
     def read(self, address, main_memory):
@@ -221,7 +222,7 @@ class Cache:
         self.cache_layer_hit_count.clear # reset the list
         
         
-        input_stream.sort(key=lambda x: x[2]) # sort the input stream by arrival time
+        # input_stream.sort(key=lambda x: x[2]) # sort the input stream by arrival time
         
         for line in input_stream:
             instructionChar, address, arr_time = line
@@ -237,7 +238,7 @@ class Cache:
 
             elif(instructionChar == 'w'):
                 print('write instruction')
-                self.write(address,main_memory) ##-- having issue here, not sure what the data will be that needs to be written to
+                self.write(address, 1111, main_memory) ##-- having issue here, not sure what the data will be that needs to be written to
 
         # now the two lists should contain the counters of hits and misses per layer in the cache
         # Output the cache status after processing all instructionsAS

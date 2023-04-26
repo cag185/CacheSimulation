@@ -132,7 +132,7 @@ class Cache:
 
         layer_index = 0
         for layer in reversed(self.cache_hierarchy):  # Traverse from highest to lowest level
-            access_latency += layer["latency"]
+            access_latency += layer["access_latency"]
             cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
 
             if cache_block and cache_block["valid"]:
@@ -288,9 +288,9 @@ class Cache:
         # print the layers h/m ratio
         print('---The Hit to Miss ratio for each layer in the cache: ---')
         ratio_h_m = []
-        for x in range(cache_layer_hit_count):
+        for x in range(self.cache_layer_hit_count):
             # ratio of hits to misses = hitcount / misscount
-            ratio_h_m.append(cache_layer_hit_count[x] / cache_layer_miss_count[x])
+            ratio_h_m.append(self.cache_layer_hit_count[x] / self.cache_layer_miss_count[x])
             print('layer ${x}: ', ratio_h_m[x])
 
         for layer_idx, layer in enumerate(self.cache_hierarchy):

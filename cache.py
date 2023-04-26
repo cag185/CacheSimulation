@@ -50,6 +50,8 @@ class Cache:
             cache_hierarchy.append(layer)
 
         return cache_hierarchy
+    
+    
 
     def parse_address(self, address):
         # Calculate the number of bits needed for the index
@@ -66,6 +68,7 @@ class Cache:
 
         return tag, cache_set_index, block_offset
 
+    
     
     def create_cache_block(self):
         return {

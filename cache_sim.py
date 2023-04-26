@@ -3,6 +3,22 @@ from cache import Cache
 # import Caleb_Instruction_Example.txt
 import os # module to open files from the system
 
+
+def get_cache_size():
+        size_str = input()
+        size_str = size_str.strip().lower()
+        
+        if size_str[-2:] == "kb" or size_str[:-2] == "KB":
+            size_bytes = int(size_str[:-2]) * 1024
+        elif size_str[-2:] == "mb" or size_str[:-2] == "MB":
+            size_bytes = int(size_str[:-2]) * 1024 * 1024
+        elif size_str[-2:] == "gb" or size_str[:-2] == "GB":
+            size_bytes = int(size_str[:-2]) * 1024 * 1024 * 1024
+        else:
+            size_bytes = int(size_str)
+            
+        return size_bytes
+
 # run the program
 def main():
     print("Welcome to Caleb and Peter's Cache simulation!")
@@ -39,10 +55,10 @@ def main():
 
         # for each layer in the cache, assign the mem size in bytes
         for cache_level in range(cache_layer_num):
-            print("Please enter the memory size in bytes (ex. 1000, 200000, 1000000) for layer ", cache_level,": ")
-            temp_size = int(input()) # retrieve size of cache layer
+            print("Please enter the memory size for layer", cache_level, "in the format (ex. 4KB, 256KB, 1MB, 2GB): ")
+            temp_size_str = input() # retrieve size of cache layer as a string
+            temp_size = get_cache_size(temp_size_str) # convert the string into bytes
             cache_layer_size.append(temp_size)
-            #main_mem_size += temp_size
         
         # for each layer in the cache, assign a latency
         for cache_level in range(cache_layer_num):

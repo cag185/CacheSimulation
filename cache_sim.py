@@ -22,7 +22,7 @@ def main():
 
     # main memory in the form of an array
     main_mem_path = "MainMemory.txt"
-    main_mem = {}
+    main_mem_dict = {}
 
     with open(main_mem_path, "r") as file:
         for line in file:

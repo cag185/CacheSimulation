@@ -242,11 +242,13 @@ class Cache:
 
     # Rather than print after every read, might be a better idea to save the delays and cache misses/hit ratio until all the instructions are read
     def output_cache_status(self):
-        # Output cache status image, hit/miss rates, and finish time of read accesses
-        print('-----The finsish time of each read, and its corresponding latency-----')
-        for hit in range(read_finish_times):
-            print('Finish time of read ${hit}: ', self.read_finish_times[hit])
-            print('Total latency of read ${hit}: ', self.read_finish_latencies[hit])
+        for layer_idx, layer in enumerate(self.cache_hierarchy):
+            print(f"Layer {layer_idx + 1}:")
+            print("Set | Block | Valid | Dirty | LRU Counter | Tag")
 
+            for set_idx, cache_set in layer["sets"].items():
+                for block_idx, cache_block in enumerate(cache_set):
+                    print(f"{set_idx:3} | {block_idx:5} | {cache_block['valid']:5} | {cache_block['dirty']:5} | {cache_block['lru_counter']:10} | {cache_block['tag']:4}")
 
-#test1
+            print("\n")
+

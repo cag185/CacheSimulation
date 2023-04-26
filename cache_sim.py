@@ -42,7 +42,7 @@ def main():
             print("Please enter the memory size in bytes (ex. 1000, 200000, 1000000) for layer ", cache_level,": ")
             temp_size = int(input()) # retrieve size of cache layer
             cache_layer_size.append(temp_size)
-            main_mem_size += temp_size
+            #main_mem_size += temp_size
         
         # for each layer in the cache, assign a latency
         for cache_level in range(cache_layer_num):
@@ -66,10 +66,10 @@ def main():
         print("Write-through with Non-Write-Allocate allocation policy [1].")
         print("Please enter '0' for the first option or '1' for the second: ")
         temp_setting = int(input())
-        if(temp_setting == 1):
+        if(temp_setting == 1 or temp_setting == 0):
             write_allocation_style = temp_setting
         else:
-            while ((temp_setting != 0) or (temp_setting != 1)):
+            while ((temp_setting != 0) and (temp_setting != 1)):
                 print("Please enter '0' for the first option or '1' for the second: ")
                 temp_setting = int(input())
         write_policy = ""

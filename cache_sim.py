@@ -83,7 +83,7 @@ def main():
         # done with settings
         busy = True
     # Create a Cache instance with the gathered parameters
-    cache1 = cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_policy, allocation_policy)
+    cache1 = Cache(cache_layer_num, cache_layer_size, cache_layer_latency, block_size, set_associativity, write_policy, allocation_policy)
 
     # data structure for holding the input stream
     input_data = []

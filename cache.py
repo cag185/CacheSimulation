@@ -192,6 +192,9 @@ class Cache:
         # Parse the input stream of memory accesses
         # ToDo - the reason this is read in this way is that the lines are already tokenized in the main file, and are passed in as a tuple that 
         # can be unpacked here
+        
+        input_stream.sort(key=lambda x: x[2]) # sort the input stream by arrival time
+        
         for line in input_stream:
             instructionChar, address, arr_time = line
 

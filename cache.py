@@ -90,14 +90,23 @@ class Cache:
 
         # Try to find an available (not valid) cache block
         available_block = None
-        for block in cache_set:
+        # find the block index where the LRU counter is highest
+        highest_lru_block_index = 0
+        highest_lru_block_value = 0
+
+        for block_index, block in enumerate(cache_set):
+            # check for the lru counter
+            if (block["lru_counter"] > highest_lru_block_value):
+                highest_lru_block_index = block_index
+                highest_lru_block_value = block["lru_counter"]
             if not block["valid"]:
                 available_block = block
                 break
 
         # If no available block is found, evict the LRU block
         if available_block is None:
-            lru_block_index = min(enumerate(cache_set), key=lambda x: x[1]["last_used"])[0]
+            lru_block_index = highest_lru_block_index
+            # lru_block_index = min(enumerate(cache_set), key=lambda x: x[1]["last_used"])[0]
             available_block = cache_set[lru_block_index]
 
         # Update the available block with the new data and tag

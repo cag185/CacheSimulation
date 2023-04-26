@@ -105,7 +105,7 @@ def main():
     input_data = []
 
     # load in the input stream 
-    folder_path = '/Input_Data'
+    folder_path = "./Input_Data"
     # get list of files
     file_list = os.listdir(folder_path)
     if (len(file_list) == 1):
@@ -113,8 +113,8 @@ def main():
             selected_file = file_list[0]
             with open(os.path.join(folder_path, selected_file), 'r') as f:
                 for line in f:
-                    tokens = line.split
-                    if(len(tokens)  == 3):
+                    tokens = line.split()
+                    if(len(tokens) == 3):
                         data_set = set(tokens) # convert the three data fields into a set
                         input_data.append(data_set) # add the set to the data structure
         except:

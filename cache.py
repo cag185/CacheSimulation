@@ -17,6 +17,11 @@ class Cache:
         self.read_finish_latencies = []
         self.block_size = block_size
         memory_access_latency = 100
+
+        # cache hit/miss code variables
+        # self.read_instruction_count = 0 # this is the variable to track the read instruction count
+        self.cache_layer_miss_count =  [] # this is a list to hold the number of misses in each cache layer as the read instructions are computed
+        self.cache_layer_hit_count = [] # this is a list to hold the number of hits in each cache layer as the read instructions are computed
         
         # Calculate the number of bits needed for the block offset
         self.block_offset_bits = int(log2(block_size))
@@ -54,6 +59,7 @@ class Cache:
     
 
     def parse_address(self, address):
+        address = int(address)
         # Calculate the number of bits needed for the index
         index_bits = int(math.log2(self.cache_hierarchy[0]["num_sets"]))
 
@@ -87,14 +93,23 @@ class Cache:
 
         # Try to find an available (not valid) cache block
         available_block = None
-        for block in cache_set:
+        # find the block index where the LRU counter is highest
+        highest_lru_block_index = 0
+        highest_lru_block_value = 0
+
+        for block_index, block in enumerate(cache_set):
+            # check for the lru counter
+            if (block["lru_counter"] > highest_lru_block_value):
+                highest_lru_block_index = block_index
+                highest_lru_block_value = block["lru_counter"]
             if not block["valid"]:
                 available_block = block
                 break
 
         # If no available block is found, evict the LRU block
         if available_block is None:
-            lru_block_index = min(enumerate(cache_set), key=lambda x: x[1]["last_used"])[0]
+            lru_block_index = highest_lru_block_index
+            # lru_block_index = min(enumerate(cache_set), key=lambda x: x[1]["last_used"])[0]
             available_block = cache_set[lru_block_index]
 
         # Update the available block with the new data and tag
@@ -102,24 +117,39 @@ class Cache:
         available_block["valid"] = True
         available_block["dirty"] = False
         available_block["data"] = data
-        available_block["last_used"] = self.current_time
+        available_block["lru_counter"] = 0
 
     
     def read(self, address, main_memory):
+    # for each read instruction, we want to calculate the hit and miss ratio for each layer
+    # ToDO: For each read instruction, check if the instruuction was a hit in the lowest (smallest) cache level
+        # if yes, we have a hit
+        # ELSE, we have a miss, go to the next layer
+    # basically want to track the hit rate of each layer per instruction
+
+
     # Calculate the tag, index, and offset from the address
         tag, cache_set_index, block_offset = self.parse_address(address)
         access_latency = 0
         data = None
 
+        layer_index = 0
         for layer in reversed(self.cache_hierarchy):  # Traverse from highest to lowest level
-            access_latency += layer["latency"]
+            access_latency += layer["access_latency"]
             cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
 
             if cache_block and cache_block["valid"]:
                 # Cache hit: store the data and exit the loop
+                cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
                 data = cache_block["data"][block_offset]
                 self.update_lru(layer, cache_set_index, cache_block_index)
                 break
+            
+            # if the data not found in the curr cache layer
+            else:
+                cache_layer_miss_count[layer_index] += 1
+            # increase the counter
+            layer_index += 1
 
         # If data is found in a higher-level cache, load it into all lower-level caches
         if data is not None:
@@ -196,8 +226,15 @@ class Cache:
         # Parse the input stream of memory accesses
         # ToDo - the reason this is read in this way is that the lines are already tokenized in the main file, and are passed in as a tuple that 
         # can be unpacked here
+
+        # for each time this command is called, reset the count for the read instructions and init the values of the hit/miss arrays to 0
+        # cache hit/miss code variables
+        # self.read_instruction_count = 0
+        self.cache_layer_miss_count.clear # reset the list
+        self.cache_layer_hit_count.clear # reset the list
         
-        input_stream.sort(key=lambda x: x[2]) # sort the input stream by arrival time
+        
+        # input_stream.sort(key=lambda x: x[2]) # sort the input stream by arrival time
         
         for line in input_stream:
             instructionChar, address, arr_time = line
@@ -213,9 +250,11 @@ class Cache:
 
             elif(instructionChar == 'w'):
                 print('write instruction')
-                self.write(address,main_memory) ##-- having issue here, not sure what the data will be that needs to be written to
-            # Output the cache status after processing all instructionsAS
-            self.output_cache_status()
+                self.write(address, 1111, main_memory) ##-- having issue here, not sure what the data will be that needs to be written to
+
+        # now the two lists should contain the counters of hits and misses per layer in the cache
+        # Output the cache status after processing all instructionsAS
+        self.output_cache_status()
     
     # def parse_input(self, input_stream,main_memory):
     # # Iterate over the input stream line by line
@@ -248,6 +287,15 @@ class Cache:
 
     # Rather than print after every read, might be a better idea to save the delays and cache misses/hit ratio until all the instructions are read
     def output_cache_status(self):
+        # for each layer in the cache, we want to compute and print the layer hit/miss ratio
+        # print the layers h/m ratio
+        print('---The Hit to Miss ratio for each layer in the cache: ---')
+        ratio_h_m = []
+        for x in range(self.cache_layer_hit_count):
+            # ratio of hits to misses = hitcount / misscount
+            ratio_h_m.append(self.cache_layer_hit_count[x] / self.cache_layer_miss_count[x])
+            print('layer ${x}: ', ratio_h_m[x])
+
         for layer_idx, layer in enumerate(self.cache_hierarchy):
             print(f"Layer {layer_idx + 1}:")
             print("Set | Block | Valid | Dirty | LRU Counter | Tag")

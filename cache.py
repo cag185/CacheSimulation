@@ -18,22 +18,18 @@ class Cache:
         self.n_size = 0 # placeholder for the block offset bits
         self.s_size = 0 # placeholder for the set-index bits
         self.m_n_s = 0 # placeholder for the tag bits
-
         # cache hit/miss code variables
         # self.read_instruction_count = 0 # this is the variable to track the read instruction count
         self.cache_layer_miss_count =  [0] * num_layers# this is a list to hold the number of misses in each cache layer as the read instructions are computed
         self.cache_layer_hit_count = [0] * num_layers# this is a list to hold the number of hits in each cache layer as the read instructions are computed
-        
         # Calculate the number of bits needed for the block offset
         self.block_offset_bits = int(log2(block_size))
-
         self.cache_hierarchy = self.initialize_cache_hierarchy()
 
     def initialize_cache_hierarchy(self):
         # Initialize the cache hierarchy based on configuration parameters
         # and create data structures for cache layers
         cache_hierarchy = []
-
         for i in range(self.num_layers):
             layer = {
                 "size": self.cache_sizes[i],
@@ -42,7 +38,6 @@ class Cache:
                 "num_sets": self.cache_sizes[i] // (self.block_size * self.set_associativities[i]),
                 "sets": {}
             }
-
             # This code is initializing the cache sets for a given cache layer. It is creating a list
             # of cache blocks for each set in the layer, where the number of blocks in each set is
             # equal to the set associativity. The `for` loop iterates over the range of `num_sets` in
@@ -52,13 +47,9 @@ class Cache:
             # then assigned to the `sets` dictionary for the corresponding set index in the layer.
             for set_index in range(layer["num_sets"]):
                 layer["sets"][set_index] = [self.create_cache_block() for _ in range(layer["associativity"])]
-
             cache_hierarchy.append(layer)
-
         return cache_hierarchy
     
-    
-
     def parse_address(self, address):
         address = int(address)
         # attempt another way to get tag
@@ -73,25 +64,12 @@ class Cache:
         tag = str(address[0:m_n_s])
         cache_set_index = str(address[m_n_s:s_size+m_n_s])
         block_offset = str(address[s_size: n_size+s_size])
-
         # convert the binary numbers into decimal
         tag = int(tag, 2)
         cache_set_index = int(cache_set_index, 2)
         block_offset = int(block_offset, 2)
-
-
-        # # Calculate the mask and shift values for the tag and index
-        # tag_shift = self.block_offset_bits + index_bits
-        # index_mask = (1 << index_bits) - 1
-        # # Extract the tag, index, and offset from the address
-        # tag = address >> tag_shift
-        # cache_set_index = (address >> self.block_offset_bits) & index_mask
-        # block_offset = address & ((1 << self.block_offset_bits) - 1)
-
         return tag, cache_set_index, block_offset
 
-    
-    
     def create_cache_block(self):
         return {
             "tag": None,
@@ -106,7 +84,6 @@ class Cache:
         This function loads data into a cache set within a layer.
         """
         cache_set = layer["sets"][cache_set_index]
-
         # Try to find an available (not valid) cache block
         available_block = None
         # find the block index where the LRU counter is highest
@@ -142,8 +119,6 @@ class Cache:
         # if yes, we have a hit
         # ELSE, we have a miss, go to the next layer
     # basically want to track the hit rate of each layer per instruction
-
-
     # Calculate the tag, index, and offset from the address
         tag, cache_set_index, block_offset = self.parse_address(address)
         access_latency = 0
@@ -152,18 +127,22 @@ class Cache:
         layer_index = 0
         for layer in (self.cache_hierarchy):  # Traverse from highest to lowest level
             access_latency += layer["access_latency"]
-
             try:
                 cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer) 
                 if cache_block and cache_block["valid"]:
                     # Cache hit: store the data and exit the loop
                     self.cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
                     data = cache_block["data"][block_offset]
-                    self.update_lru(layer, cache_set_index, cache_block_index)
+                    # self.update_lru(layer, cache_set_index, cache_block_index)
+                    self.update_lru(layer, cache_set_index, cache_block_index) # use optional param with block index getting hit
                     break
             except:
                 # if the data not found in the curr cache layer
                 self.cache_layer_miss_count[layer_index] += 1
+                try:
+                    self.update_lru(layer, cache_set_index)
+                except: 
+                        print('Cache did not have the set index or layer you tried to access')
                 print("Miss!")
             # increase the counter
             layer_index += 1
@@ -225,23 +204,45 @@ class Cache:
 
 
     def find_cache_block(self, tag, cache_set_index, layer):
-        
-    
             cache_set = layer["sets"][cache_set_index]
-
             for block_index, cache_block in enumerate(cache_set):
                 if cache_block["valid"] and cache_block["tag"] == tag:
                     return block_index, cache_block
-           
             return
 
+    # def update_lru(self, layer, cache_set_index, block_index):
+    #     for block in layer["sets"][cache_set_index]:
+    #         block["lru_counter"] += 1
+    #     layer["sets"][cache_set_index][block_index]["lru_counter"] = 0
 
+    # the lru shouldnt care about the block index but rather parse the entire set
+    def update_lru(self, layer, cache_set_index, block_index_hit=-1):
+        # find the max LRU
+        # if we have a block index >= 0 then that is a hit, update that blocks LRU counter to 0 and
+        # all the other LRU counters +=1
+        if(block_index_hit >= 0):
+            # update all blocks
+            for block in layer["sets"][cache_set_index]:
+                block["lru_counter"] += 1
+            # finally update the block that has been hit
+            layer["sets"][cache_set_index][block_index_hit]["lru_counter"] = 0
 
-    def update_lru(self, layer, cache_set_index, block_index):
+        lru_max = 0
+        lru_block_index = 0
+        # check for an empty block in the cache
+        for block, block_idx in enumerate(layer["sets"][cache_set_index]):
+            if block["lru_counter"] > lru_max:
+                lru_max = block["lru_counter"]
+                lru_block_index = block_idx
+            if(block["valid"] == False):
+                # have an empty block, no need to update
+                break
+        # otherwise we dont have a free block and need to evict
         for block in layer["sets"][cache_set_index]:
             block["lru_counter"] += 1
-
-        layer["sets"][cache_set_index][block_index]["lru_counter"] = 0
+        # if there is a miss and no room, we need to evict the lru block to make room
+        layer["sets"][cache_set_index][lru_block_index]["lru_counter"] = 0
+        
 
     # input data is instruction (r/w), address, and the arrival time
     def parse_input(self, input_stream, main_memory):

@@ -122,7 +122,7 @@ class Cache:
     # Calculate the tag, index, and offset from the address
         tag, cache_set_index, block_offset = self.parse_address(address)
         access_latency = 0
-        data = None
+        data = [0] * self.block_size
 
         layer_index = 0
         for layer in (self.cache_hierarchy):  # Traverse from highest to lowest level
@@ -132,7 +132,7 @@ class Cache:
                 if cache_block and cache_block["valid"]:
                     # Cache hit: store the data and exit the loop
                     self.cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
-                    data = cache_block["data"][block_offset]
+                    data = cache_block["data"]
                     # self.update_lru(layer, cache_set_index, cache_block_index)
                     print("test")
                     self.update_lru(layer, cache_set_index, cache_block_index) # use optional param with block index getting hit
@@ -159,7 +159,7 @@ class Cache:
         else:
             # If not found in any cache, read the data from memory
             access_latency += self.memory_access_latency
-            data = main_memory.get(address)
+            data[block_offset] = main_memory.get(address)
 
             # Load data into all cache levels
             for layer in self.cache_hierarchy:

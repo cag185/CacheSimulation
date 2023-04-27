@@ -98,7 +98,7 @@ class Cache:
             "valid": False,
             "dirty": False,
             "lru_counter": 0,
-            "data": bytearray(self.block_size)  # Initialize the data field as a bytearray of the specified block size
+            "data": [0] * self.block_size # Initialize the data field as a bytearray of the specified block size
     }
     
     def load_data_into_cache(self, layer, tag, cache_set_index, data):
@@ -276,6 +276,7 @@ class Cache:
         # now the two lists should contain the counters of hits and misses per layer in the cache
         # Output the cache status after processing all instructionsAS
         self.output_cache_status() # might need to comment this out and display all blocks in all layers for every read
+        
         self.output_cache_HM_ratio()
 
    # display the read delay and latency for each read instruction

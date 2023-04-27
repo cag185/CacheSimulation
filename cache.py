@@ -152,10 +152,11 @@ class Cache:
         data = None
 
         layer_index = 0
-        for layer in reversed(self.cache_hierarchy):  # Traverse from highest to lowest level
+        for layer in (self.cache_hierarchy):  # Traverse from highest to lowest level
             access_latency += layer["access_latency"]
+        
             cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
-
+            
             if cache_block and cache_block["valid"]:
                 # Cache hit: store the data and exit the loop
                 self.cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
@@ -226,12 +227,17 @@ class Cache:
 
 
     def find_cache_block(self, tag, cache_set_index, layer):
-        cache_set = layer["sets"][cache_set_index]
+        
+        try:
+            cache_set = layer["sets"][cache_set_index]
 
-        for block_index, cache_block in enumerate(cache_set):
-            if cache_block["valid"] and cache_block["tag"] == tag:
-                return block_index, cache_block
-        return None, None
+            for block_index, cache_block in enumerate(cache_set):
+                if cache_block["valid"] and cache_block["tag"] == tag:
+                    return block_index, cache_block
+        except:    
+            return None, None
+
+
 
     def update_lru(self, layer, cache_set_index, block_index):
         for block in layer["sets"][cache_set_index]:

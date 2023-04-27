@@ -159,7 +159,7 @@ class Cache:
         else:
             # If not found in any cache, read the data from memory
             access_latency += self.memory_access_latency
-            data[block_offset] = main_memory.get(address)
+            data[block_offset] = int(main_memory.get(address))
 
             # Load data into all cache levels
             for layer in self.cache_hierarchy:
@@ -187,14 +187,16 @@ class Cache:
                 if layer_idx > 0:
                     prev_layer = self.cache_hierarchy[layer_idx - 1]
                     prev_cache_block = self.find_cache_block(tag, cache_set_index, prev_layer)
-                    if prev_cache_block and prev_cache_block[0]["valid"]:
+                    if prev_cache_block and prev_cache_block[0]['valid']:
                         cache_block = prev_cache_block
 
                 if self.write_policy == "write-back":
-                    cache_block[0]["data"][block_offset] = data
-                    cache_block["dirty"] = True
+                    cacheblockdict = dict(cache_block)
+                    cacheblockdict.get('data')[block_offset] = data
+
+                    cache_block['dirty'] = True
                 elif self.write_policy == "write-through":
-                    cache_block["data"][block_offset] = data
+                    cache_block['data'][block_offset] = data
                     main_memory[address] = data
                     main_memory[address] = data
                     
@@ -210,9 +212,9 @@ class Cache:
 
 
     def find_cache_block(self, tag, cache_set_index, layer):
-            cache_set = layer["sets"][cache_set_index]
+            cache_set = layer['sets'][cache_set_index]
             for block_index, cache_block in enumerate(cache_set):
-                if cache_block["valid"] and cache_block["tag"] == tag:
+                if cache_block['valid'] and cache_block['tag'] == tag:
                     return cache_block, block_index
             return
 
@@ -278,7 +280,7 @@ class Cache:
 
             elif(instructionChar == 'w'):
                 print('write instruction')
-                data = main_memory[address]
+                data = 696969
                 self.write(address, data, main_memory) ##-- having issue here, not sure what the data will be that needs to be written to
 
         # now the two lists should contain the counters of hits and misses per layer in the cache

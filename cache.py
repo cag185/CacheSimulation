@@ -148,6 +148,7 @@ class Cache:
         tag, cache_set_index, block_offset = self.parse_address(address)
         access_latency = 0
         data = [0] * self.block_size
+        hit_true = False
 
         layer_index = 0
         for layer in (self.cache_hierarchy):  # Traverse from highest to lowest level
@@ -160,6 +161,7 @@ class Cache:
                     data = cache_block["data"]
                     # self.update_lru(layer, cache_set_index, cache_block_index)
                     self.update_lru(layer, cache_set_index, cache_block_index) # use optional param with block index getting hit
+                    hit_true = True
                     break
             except:
                 # if the data not found in the curr cache layer
@@ -173,7 +175,7 @@ class Cache:
             layer_index += 1
 
         # If data is found in a higher-level cache, load it into all lower-level caches
-        if data is not None:
+        if (hit_true):
             for layer in self.cache_hierarchy:
                 if not self.find_cache_block(tag, cache_set_index, layer):
                     self.load_data_into_cache(layer, tag, cache_set_index, data)
@@ -240,7 +242,17 @@ class Cache:
 
 
 
-    def update_lru(self, layer, cache_set_index, block_index):
+        lru_max = 0
+        lru_block_index = 0
+        # check for an empty block in the cache
+        for block, block_idx in enumerate(layer["sets"][cache_set_index]):
+            if block["lru_counter"] > lru_max:
+                lru_max = block["lru_counter"]
+                lru_block_index = block_idx
+            if(block["valid"] == False):
+                # have an empty block, no need to update
+                return
+        # otherwise we dont have a free block and need to evict
         for block in layer["sets"][cache_set_index]:
             block["lru_counter"] += 1
 

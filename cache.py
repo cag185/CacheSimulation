@@ -274,14 +274,17 @@ class Cache:
         self.cache_layer_hit_count.clear # reset the list
         # input_stream.sort(key=lambda x: x[2]) # sort the input stream by arrival time
         
-        for line in input_stream:
+        for count, line in enumerate(input_stream):
             instructionChar, address, arr_time = line
 
             # based on the operation call a different function
             if(instructionChar == 'r'):
                 read_results = self.read(address, main_memory)
-                self.read_finish_times.append (int(arr_time) + read_results[1]) # append the time taken to get a hit
-                self.read_finish_latencies.append(read_results[1]) # append the time taken to get a hit without the initial time
+                self.read_finish_latencies.append(read_results[1]) # append the time taken to get a hit
+                if (count == 0):
+                    self.read_finish_times.append(int(arr_time) + read_results[1]) # append the time taken to get a hit without the initial time
+                else:
+                    self.read_finish_times.append(self.read_finish_times[count-1] + self.read_finish_latencies[count-1] + int(arr_time))
                 # output
                 # self.output_cache_status()
                 self.output_read_times()

@@ -159,7 +159,10 @@ class Cache:
                     # Cache hit: store the data and exit the loop
                     self.cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
                     data = cache_block["data"][block_offset]
-                    self.update_lru(layer, cache_set_index, cache_block_index)
+                    # self.update_lru(layer, cache_set_index, cache_block_index)
+                    print("test")
+                    self.update_lru(layer, cache_set_index, cache_block_index) # use optional param with block index getting hit
+                    print('Test2')
                     break
             except:
                 # if the data not found in the curr cache layer
@@ -231,8 +234,7 @@ class Cache:
 
             for block_index, cache_block in enumerate(cache_set):
                 if cache_block["valid"] and cache_block["tag"] == tag:
-                    return block_index, cache_block
-           
+                    return cache_block, block_index
             return
 
 

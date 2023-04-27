@@ -72,9 +72,15 @@ class Cache:
         m_n_s = int((address_len) - (s_size) - (n_size)) # gets the size of m-s-n (the tag)
         address = str(address)
         # assign the actual value for tag, index, and offset
-        tag = int(address[0:m_n_s])
-        cache_set_index = int(address[m_n_s:s_size+m_n_s])
-        block_offset = int(address[s_size: n_size+s_size])
+        tag = str(address[0:m_n_s])
+        cache_set_index = str(address[m_n_s:s_size+m_n_s])
+        block_offset = str(address[s_size: n_size+s_size])
+
+        # convert the binary numbers into decimal
+        tag = int(tag, 2)
+        cache_set_index = int(cache_set_index, 2)
+        block_offset = int(block_offset, 2)
+
 
         # # Calculate the mask and shift values for the tag and index
         # tag_shift = self.block_offset_bits + index_bits

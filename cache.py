@@ -196,7 +196,6 @@ class Cache:
                 elif self.write_policy == "write-through":
                     cache_block['data'][cache_block_index] = data
                     main_memory[address] = data
-                    
                     self.update_lru(layer, cache_set_index, cache_block_index)
 
         if not write_hit:
@@ -235,7 +234,7 @@ class Cache:
         lru_max = 0
         lru_block_index = 0
         # check for an empty block in the cache
-        for block, block_idx in enumerate(layer["sets"][cache_set_index]):
+        for block_idx, block in enumerate(layer["sets"][cache_set_index]):
             if block["lru_counter"] > lru_max:
                 lru_max = block["lru_counter"]
                 lru_block_index = block_idx

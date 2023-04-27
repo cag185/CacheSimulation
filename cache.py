@@ -11,8 +11,6 @@ class Cache:
         self.write_policy = write_policy
         self.allocation_policy = allocation_policy
         self.cache_hierarchy = self.initialize_cache_hierarchy()
-        self.hit_counters = [0] * num_layers
-        self.miss_counters = [0] * num_layers
         self.read_finish_times = []
         self.read_finish_latencies = []
         self.block_size = block_size
@@ -163,11 +161,10 @@ class Cache:
                     data = cache_block["data"][block_offset]
                     self.update_lru(layer, cache_set_index, cache_block_index)
                     break
-                # if the data not found in the curr cache layer
-                else:
-                    self.cache_layer_miss_count[layer_index] += 1
             except:
-                    print("Miss!")
+                # if the data not found in the curr cache layer
+                self.cache_layer_miss_count[layer_index] += 1
+                print("Miss!")
             # increase the counter
             layer_index += 1
 
@@ -317,3 +314,11 @@ class Cache:
             # ratio of hits to misses = hitcount / misscount
             ratio_h_m.append(0.0) if (self.cache_layer_miss_count[x] == 0 and self.cache_layer_hit_count[x]==0) else ratio_h_m.append(self.cache_layer_hit_count[x] / (self.cache_layer_miss_count[x] + self.cache_layer_hit_count[x])) # should compute hit/ (hit + miss)
             print(f"layer {x}: ", ratio_h_m[x])
+        print()
+        print('---The Miss to Hit ratio for each layer in the cache: ---')
+        print()
+        ratio_m_h = []
+        for x in range(len(self.cache_layer_miss_count)):
+            # ratio of hits to misses = hitcount / misscount
+            ratio_m_h.append(0.0) if (self.cache_layer_miss_count[x] == 0 and self.cache_layer_hit_count[x]==0) else ratio_m_h.append(self.cache_layer_miss_count[x] / (self.cache_layer_miss_count[x] + self.cache_layer_hit_count[x])) # should compute hit/ (hit + miss)
+            print(f"layer {x}: ", ratio_m_h[x])

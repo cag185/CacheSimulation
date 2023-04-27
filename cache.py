@@ -271,7 +271,7 @@ class Cache:
         # print the layers h/m ratio
         print('---The Hit to Miss ratio for each layer in the cache: ---')
         ratio_h_m = []
-        for x in range(self.cache_layer_hit_count):
+        for x in range(len(self.cache_layer_hit_count)):
             # ratio of hits to misses = hitcount / misscount
-            ratio_h_m.append(self.cache_layer_hit_count[x] / (self.cache_layer_miss_count[x] + self.cache_layer_hit_count[x])) # should compute hit/ (hit + miss)
-            print('layer ${x}: ', ratio_h_m[x])
+            ratio_h_m.append(0.0) if (self.cache_layer_miss_count[x] == 0 and self.cache_layer_hit_count[x]==0) else ratio_h_m.append(self.cache_layer_hit_count[x] / (self.cache_layer_miss_count[x] + self.cache_layer_hit_count[x])) # should compute hit/ (hit + miss)
+            print(f"layer {x}: ", ratio_h_m[x])

@@ -242,6 +242,7 @@ class Cache:
 
 
 
+    def update_lru(self, layer, cache_set_index, block_index):
         lru_max = 0
         lru_block_index = 0
         # check for an empty block in the cache

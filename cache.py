@@ -174,8 +174,12 @@ class Cache:
 
         write_hit = False
         for layer_idx, layer in enumerate(self.cache_hierarchy):
-            cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
-
+            cache_block = None
+            cache_block_index = None
+            if(self.find_cache_block(tag, cache_set_index, layer)):
+                cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
+            else:
+                break
             if cache_block and cache_block["valid"]:
                 write_hit = True
 
@@ -183,11 +187,11 @@ class Cache:
                 if layer_idx > 0:
                     prev_layer = self.cache_hierarchy[layer_idx - 1]
                     prev_cache_block = self.find_cache_block(tag, cache_set_index, prev_layer)
-                    if prev_cache_block and prev_cache_block["valid"]:
+                    if prev_cache_block and prev_cache_block[0]["valid"]:
                         cache_block = prev_cache_block
 
                 if self.write_policy == "write-back":
-                    cache_block["data"][block_offset] = data
+                    cache_block[0]["data"][block_offset] = data
                     cache_block["dirty"] = True
                 elif self.write_policy == "write-through":
                     cache_block["data"][block_offset] = data
@@ -274,7 +278,8 @@ class Cache:
 
             elif(instructionChar == 'w'):
                 print('write instruction')
-                self.write(address, 1111, main_memory) ##-- having issue here, not sure what the data will be that needs to be written to
+                data = main_memory[address]
+                self.write(address, data, main_memory) ##-- having issue here, not sure what the data will be that needs to be written to
 
         # now the two lists should contain the counters of hits and misses per layer in the cache
         # Output the cache status after processing all instructionsAS

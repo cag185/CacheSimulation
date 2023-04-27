@@ -18,21 +18,17 @@ class Cache:
         self.n_size = 0 # placeholder for the block offset bits
         self.s_size = 0 # placeholder for the set-index bits
         self.m_n_s = 0 # placeholder for the tag bits
-
         # cache hit/miss code variables
         # self.read_instruction_count = 0 # this is the variable to track the read instruction count
         self.cache_layer_miss_count =  [0] * num_layers# this is a list to hold the number of misses in each cache layer as the read instructions are computed
         self.cache_layer_hit_count = [0] * num_layers# this is a list to hold the number of hits in each cache layer as the read instructions are computed
-        
         # Calculate the number of bits needed for the block offset
         self.block_offset_bits = int(log2(block_size))
-
         self.cache_hierarchy = self.initialize_cache_hierarchy()
     def initialize_cache_hierarchy(self):
         # Initialize the cache hierarchy based on configuration parameters
         # and create data structures for cache layers
         cache_hierarchy = []
-
         for i in range(self.num_layers):
             layer = {
                 "size": self.cache_sizes[i],
@@ -41,7 +37,6 @@ class Cache:
                 "num_sets": self.cache_sizes[i] // (self.block_size * self.set_associativities[i]),
                 "sets": {}
             }
-
             # This code is initializing the cache sets for a given cache layer. It is creating a list
             # of cache blocks for each set in the layer, where the number of blocks in each set is
             # equal to the set associativity. The `for` loop iterates over the range of `num_sets` in
@@ -51,18 +46,10 @@ class Cache:
             # then assigned to the `sets` dictionary for the corresponding set index in the layer.
             for set_index in range(layer["num_sets"]):
                 layer["sets"][set_index] = [self.create_cache_block() for _ in range(layer["associativity"])]
-
             cache_hierarchy.append(layer)
-
         return cache_hierarchy
     
-<<<<<<< HEAD
     def parse_address(self, address, layer):
-=======
-    
-
-    def parse_address(self, address):
->>>>>>> caleb_branch_2
         address = int(address)
         # attempt another way to get tag
         address_len = len(str(address))
@@ -76,42 +63,21 @@ class Cache:
         tag = str(address[0:m_n_s])
         cache_set_index = str(address[m_n_s:s_size+m_n_s])
         block_offset = str(address[s_size: n_size+s_size])
-
         # convert the binary numbers into decimal
         tagbin = tag
         tag = int(tag, 2)
         cache_set_index = int(cache_set_index, 2)
         block_offset = int(block_offset, 2)
-<<<<<<< HEAD
         return tag, cache_set_index, block_offset, tagbin
-=======
 
-
-        # # Calculate the mask and shift values for the tag and index
-        # tag_shift = self.block_offset_bits + index_bits
-        # index_mask = (1 << index_bits) - 1
-        # # Extract the tag, index, and offset from the address
-        # tag = address >> tag_shift
-        # cache_set_index = (address >> self.block_offset_bits) & index_mask
-        # block_offset = address & ((1 << self.block_offset_bits) - 1)
-
-        return tag, cache_set_index, block_offset
->>>>>>> caleb_branch_2
-
-    
-    
     def create_cache_block(self):
         return {
             "tag": None,
             "valid": False,
             "dirty": False,
             "lru_counter": 0,
-<<<<<<< HEAD
             "data": [0] * (self.block_size), # Initialize the data field as a of the specified block size
             "tagBIN": 0
-=======
-            "data": [0] * self.block_size # Initialize the data field as a bytearray of the specified block size
->>>>>>> caleb_branch_2
     }
     
     def load_data_into_cache(self, layer, tag, cache_set_index, data, tagbin):
@@ -119,11 +85,7 @@ class Cache:
         This function loads data into a cache set within a layer.
         """
         cache_set = layer["sets"][cache_set_index]
-<<<<<<< HEAD
         
-=======
-
->>>>>>> caleb_branch_2
         # Try to find an available (not valid) cache block
         available_block = None
         # find the block index where the LRU counter is highest
@@ -160,8 +122,6 @@ class Cache:
         # if yes, we have a hit
         # ELSE, we have a miss, go to the next layer
     # basically want to track the hit rate of each layer per instruction
-
-
     # Calculate the tag, index, and offset from the address
         
         
@@ -208,7 +168,7 @@ class Cache:
         else:
             # If not found in any cache, read the data from memory
             access_latency += self.memory_access_latency
-            data[block_offset] = main_memory.get(address)
+            data[block_offset] = int(main_memory.get(address))
 
             # Load data into all cache levels
             for layer in self.cache_hierarchy:
@@ -261,18 +221,29 @@ class Cache:
 
 
     def find_cache_block(self, tag, cache_set_index, layer):
-        
-    
-            cache_set = layer["sets"][cache_set_index]
-
+            cache_set = layer['sets'][cache_set_index]
             for block_index, cache_block in enumerate(cache_set):
-                if cache_block["valid"] and cache_block["tag"] == tag:
+                if cache_block['valid'] and cache_block['tag'] == tag:
                     return cache_block, block_index
             return
 
+    # def update_lru(self, layer, cache_set_index, block_index):
+    #     for block in layer["sets"][cache_set_index]:
+    #         block["lru_counter"] += 1
+    #     layer["sets"][cache_set_index][block_index]["lru_counter"] = 0
 
+    # the lru shouldnt care about the block index but rather parse the entire set
+    def update_lru(self, layer, cache_set_index, block_index_hit=-1):
+        # find the max LRU
+        # if we have a block index >= 0 then that is a hit, update that blocks LRU counter to 0 and
+        # all the other LRU counters +=1
+        if(block_index_hit >= 0):
+            # update all blocks
+            for block in layer["sets"][cache_set_index]:
+                block["lru_counter"] += 1
+            # finally update the block that has been hit
+            layer["sets"][cache_set_index][block_index_hit]["lru_counter"] = 0
 
-    def update_lru(self, layer, cache_set_index, block_index):
         lru_max = 0
         lru_block_index = 0
         # check for an empty block in the cache
@@ -286,8 +257,9 @@ class Cache:
         # otherwise we dont have a free block and need to evict
         for block in layer["sets"][cache_set_index]:
             block["lru_counter"] += 1
-
-        layer["sets"][cache_set_index][block_index]["lru_counter"] = 0
+        # if there is a miss and no room, we need to evict the lru block to make room
+        layer["sets"][cache_set_index][lru_block_index]["lru_counter"] = 0
+        
 
     # input data is instruction (r/w), address, and the arrival time
     def parse_input(self, input_stream, main_memory):
@@ -302,19 +274,14 @@ class Cache:
         self.cache_layer_hit_count.clear # reset the list
         # input_stream.sort(key=lambda x: x[2]) # sort the input stream by arrival time
         
-        for count, line in enumerate(input_stream):
+        for line in input_stream:
             instructionChar, address, arr_time = line
 
             # based on the operation call a different function
             if(instructionChar == 'r'):
                 read_results = self.read(address, main_memory)
+                self.read_finish_times.append (int(arr_time) + read_results[1]) # append the time taken to get a hit
                 self.read_finish_latencies.append(read_results[1]) # append the time taken to get a hit without the initial time
-                if(count == 0):
-                    self.read_finish_times.append(int(arr_time) + read_results[1]) # append the time taken to get a hit
-                else :
-                    # add the last finsish time to the current time
-                    self.read_finish_times.append(read_results[1] +int(arr_time) +  self.read_finish_times[count-1]) # gets the previous finish time and adds the latency to it
-
                 # output
                 # self.output_cache_status()
                 self.output_read_times()
@@ -326,7 +293,6 @@ class Cache:
         # now the two lists should contain the counters of hits and misses per layer in the cache
         # Output the cache status after processing all instructionsAS
         self.output_cache_status() # might need to comment this out and display all blocks in all layers for every read
-        
         self.output_cache_HM_ratio()
 
    # display the read delay and latency for each read instruction

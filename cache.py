@@ -171,14 +171,15 @@ class Cache:
     def write(self, address, data, main_memory):
     # Implement write operation
         tag, cache_set_index, block_offset = self.parse_address(address)
-
         write_hit = False
         for layer_idx, layer in enumerate(self.cache_hierarchy):
-            cache_block = None
-            cache_block_index = None
+            # cache_block = None
+            # cache_block_index = None
             if(self.find_cache_block(tag, cache_set_index, layer)):
                 cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
+                print(cache_block["data"])
             else:
+                # could not find the cache block 
                 break
             if cache_block and cache_block["valid"]:
                 write_hit = True
@@ -186,18 +187,15 @@ class Cache:
                 # Check if the block is present in the lower-level cache
                 if layer_idx > 0:
                     prev_layer = self.cache_hierarchy[layer_idx - 1]
-                    prev_cache_block = self.find_cache_block(tag, cache_set_index, prev_layer)
-                    if prev_cache_block and prev_cache_block[0]['valid']:
-                        cache_block = prev_cache_block
+                    prev_cache_block, prev_cache_block_index = self.find_cache_block(tag, cache_set_index, prev_layer)
+                    if prev_cache_block and prev_cache_block['valid']:
+                        cache_block = prev_cache_block # goes wrong here
 
                 if self.write_policy == "write-back":
-                    cacheblockdict = dict(cache_block)
-                    cacheblockdict.get('data')[block_offset] = data
-
+                    cache_block["data"][cache_block_index] = data
                     cache_block['dirty'] = True
                 elif self.write_policy == "write-through":
-                    cache_block['data'][block_offset] = data
-                    main_memory[address] = data
+                    cache_block['data'][cache_block_index] = data
                     main_memory[address] = data
                     
                     self.update_lru(layer, cache_set_index, cache_block_index)

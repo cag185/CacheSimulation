@@ -271,7 +271,8 @@ class Cache:
                 self.read_finish_times.append (int(arr_time) + read_results[1]) # append the time taken to get a hit
                 self.read_finish_latencies.append(read_results[1]) # append the time taken to get a hit without the initial time
                 # output
-                self.output_cache_status()
+                # self.output_cache_status()
+                self.output_read_times()
 
             elif(instructionChar == 'w'):
                 print('write instruction')
@@ -279,12 +280,26 @@ class Cache:
 
         # now the two lists should contain the counters of hits and misses per layer in the cache
         # Output the cache status after processing all instructionsAS
+        self.output_cache_status() # might need to comment this out and display all blocks in all layers for every read
         self.output_cache_HM_ratio()
+
+   # display the read delay and latency for each read instruction
+    def output_read_times(self):
+        print("----- Read latencies and Finish times ------")
+        print()
+        for read in range(len(self.read_finish_latencies)):
+            print(f"Read {read} finish time: " , self.read_finish_times[read])
+            print(f"Total latency of read {read}: ", self.read_finish_latencies[read])
+
 
     # Rather than print after every read, might be a better idea to save the delays and cache misses/hit ratio until all the instructions are read
     def output_cache_status(self):
-        for layernum, layer in enumerate(self.cache_hierarchy):  
+        for layernum, layer in enumerate(self.cache_hierarchy):
+            print()  
+            print(f"\t-------- Layer {layernum} --------")
+            print()
             for set_idx, cache_set in layer['sets'].items():
+                # print(f" set index |\t block index |\t valid |\t dirty |\t lru counter |\t tag ")
                 for block_idx, cache_block in enumerate(cache_set):
                     valid = cache_block['valid'] if cache_block['valid'] is not None else 'N/A'
                     dirty = cache_block['dirty'] if cache_block['dirty'] is not None else 'N/A'
@@ -296,7 +311,9 @@ class Cache:
         # this function specifically outputs the Hit to miss ratio of the cache
         # for each layer in the cache, we want to compute and print the layer hit/miss ratio
         # print the layers h/m ratio
+        print()
         print('---The Hit to Miss ratio for each layer in the cache: ---')
+        print()
         ratio_h_m = []
         for x in range(len(self.cache_layer_hit_count)):
             # ratio of hits to misses = hitcount / misscount

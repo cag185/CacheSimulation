@@ -134,9 +134,7 @@ class Cache:
                     self.cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
                     data = cache_block["data"]
                     # self.update_lru(layer, cache_set_index, cache_block_index)
-                    print("test")
                     self.update_lru(layer, cache_set_index, cache_block_index) # use optional param with block index getting hit
-                    print('Test2')
                     break
             except:
                 # if the data not found in the curr cache layer

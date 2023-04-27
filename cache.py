@@ -165,7 +165,7 @@ class Cache:
                     break
             except:
                     print("Miss!")
-           
+     
             
             # if the data not found in the curr cache layer
             else:

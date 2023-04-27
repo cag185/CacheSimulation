@@ -177,7 +177,6 @@ class Cache:
             # cache_block_index = None
             if(self.find_cache_block(tag, cache_set_index, layer)):
                 cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
-                print(cache_block["data"])
             else:
                 # could not find the cache block 
                 break
@@ -268,7 +267,6 @@ class Cache:
 
             # based on the operation call a different function
             if(instructionChar == 'r'):
-                print('read instruction')
                 read_results = self.read(address, main_memory)
                 self.read_finish_times.append (int(arr_time) + read_results[1]) # append the time taken to get a hit
                 self.read_finish_latencies.append(read_results[1]) # append the time taken to get a hit without the initial time
@@ -277,7 +275,6 @@ class Cache:
                 self.output_read_times()
 
             elif(instructionChar == 'w'):
-                print('write instruction')
                 data = 696969
                 self.write(address, data, main_memory) ##-- having issue here, not sure what the data will be that needs to be written to
 

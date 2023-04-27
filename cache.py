@@ -208,8 +208,9 @@ class Cache:
                 if layer_idx > 0:
                     prev_layer = self.cache_hierarchy[layer_idx - 1]
                     prev_cache_block = self.find_cache_block(tag, cache_set_index, prev_layer)
-                    if prev_cache_block and prev_cache_block["valid"]:
-                        cache_block = prev_cache_block
+                    prevcache = prev_cache_block[0]
+                    if prevcache and prevcache["valid"]:
+                        cache_block = prevcache
 
                 if self.write_policy == "write-back":
                     cache_block["data"][block_offset] = data

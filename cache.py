@@ -153,21 +153,21 @@ class Cache:
         for layer in (self.cache_hierarchy):  # Traverse from highest to lowest level
             access_latency += layer["access_latency"]
 
-            try:
-                cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer) 
-                if cache_block and cache_block["valid"]:
-                    # Cache hit: store the data and exit the loop
-                    self.cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
-                    data = cache_block["data"][block_offset]
-                    # self.update_lru(layer, cache_set_index, cache_block_index)
-                    print("test")
-                    self.update_lru(layer, cache_set_index, cache_block_index) # use optional param with block index getting hit
-                    print('Test2')
-                    break
-            except:
-                # if the data not found in the curr cache layer
-                self.cache_layer_miss_count[layer_index] += 1
-                print("Miss!")
+            # try:
+            cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer) 
+            if cache_block and cache_block["valid"]:
+                # Cache hit: store the data and exit the loop
+                self.cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
+                data = cache_block["data"][block_offset]
+                # self.update_lru(layer, cache_set_index, cache_block_index)
+                print("test")
+                self.update_lru(layer, cache_set_index, cache_block_index) # use optional param with block index getting hit
+                print('Test2')
+                break
+            # except:
+            #     # if the data not found in the curr cache layer
+            #     self.cache_layer_miss_count[layer_index] += 1
+            #     print("Miss!")
             # increase the counter
             layer_index += 1
 

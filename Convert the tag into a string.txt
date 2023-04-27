@@ -1,0 +1,3 @@
+Convert the tag into a string
+take into account the latency of the instructions and how that postpones the arrival time
+Need to calculate instructions for each level 

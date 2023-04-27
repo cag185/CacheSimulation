@@ -56,13 +56,7 @@ class Cache:
 
         return cache_hierarchy
     
-<<<<<<< HEAD
-    
-
-    def parse_address(self, address):
-=======
     def parse_address(self, address, layer):
->>>>>>> peter_branch_3
         address = int(address)
         # attempt another way to get tag
         address_len = len(str(address))
@@ -82,21 +76,7 @@ class Cache:
         tag = int(tag, 2)
         cache_set_index = int(cache_set_index, 2)
         block_offset = int(block_offset, 2)
-<<<<<<< HEAD
-
-
-        # # Calculate the mask and shift values for the tag and index
-        # tag_shift = self.block_offset_bits + index_bits
-        # index_mask = (1 << index_bits) - 1
-        # # Extract the tag, index, and offset from the address
-        # tag = address >> tag_shift
-        # cache_set_index = (address >> self.block_offset_bits) & index_mask
-        # block_offset = address & ((1 << self.block_offset_bits) - 1)
-
-        return tag, cache_set_index, block_offset
-=======
         return tag, cache_set_index, block_offset, tagbin
->>>>>>> peter_branch_3
 
     
     
@@ -106,12 +86,8 @@ class Cache:
             "valid": False,
             "dirty": False,
             "lru_counter": 0,
-<<<<<<< HEAD
-            "data": [0] * self.block_size # Initialize the data field as a bytearray of the specified block size
-=======
             "data": [0] * (self.block_size), # Initialize the data field as a of the specified block size
             "tagBIN": 0
->>>>>>> peter_branch_3
     }
     
     def load_data_into_cache(self, layer, tag, cache_set_index, data, tagbin):
@@ -119,11 +95,6 @@ class Cache:
         This function loads data into a cache set within a layer.
         """
         cache_set = layer["sets"][cache_set_index]
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> peter_branch_3
         # Try to find an available (not valid) cache block
         available_block = None
         # find the block index where the LRU counter is highest

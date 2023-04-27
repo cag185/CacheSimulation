@@ -17,6 +17,9 @@ class Cache:
         self.read_finish_latencies = []
         self.block_size = block_size
         self.memory_access_latency = 100
+        self.n_size = 0 # placeholder for the block offset bits
+        self.s_size = 0 # placeholder for the set-index bits
+        self.m_n_s = 0 # placeholder for the tag bits
 
         # cache hit/miss code variables
         # self.read_instruction_count = 0 # this is the variable to track the read instruction count
@@ -60,17 +63,26 @@ class Cache:
 
     def parse_address(self, address):
         address = int(address)
+        # attempt another way to get tag
+        address_len = len(str(address))
         # Calculate the number of bits needed for the index
         index_bits = int(math.log2(self.cache_hierarchy[0]["num_sets"]))
+        s_size = int(index_bits) # the size of s (the set index)
+        n_size = int(math.log2(self.block_size)) # the size of n (the block offset)
+        m_n_s = int((address_len) - (s_size) - (n_size)) # gets the size of m-s-n (the tag)
+        address = str(address)
+        # assign the actual value for tag, index, and offset
+        tag = int(address[0:m_n_s])
+        cache_set_index = int(address[m_n_s:s_size+m_n_s])
+        block_offset = int(address[s_size: n_size+s_size])
 
-        # Calculate the mask and shift values for the tag and index
-        tag_shift = self.block_offset_bits + index_bits
-        index_mask = (1 << index_bits) - 1
-
-        # Extract the tag, index, and offset from the address
-        tag = address >> tag_shift
-        cache_set_index = (address >> self.block_offset_bits) & index_mask
-        block_offset = address & ((1 << self.block_offset_bits) - 1)
+        # # Calculate the mask and shift values for the tag and index
+        # tag_shift = self.block_offset_bits + index_bits
+        # index_mask = (1 << index_bits) - 1
+        # # Extract the tag, index, and offset from the address
+        # tag = address >> tag_shift
+        # cache_set_index = (address >> self.block_offset_bits) & index_mask
+        # block_offset = address & ((1 << self.block_offset_bits) - 1)
 
         return tag, cache_set_index, block_offset
 

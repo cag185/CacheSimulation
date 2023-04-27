@@ -115,7 +115,7 @@ def main():
                 for line in f:
                     tokens = line.split()
                     if(len(tokens) == 3):
-                        data_set = set(tokens) # convert the three data fields into a set
+                        data_set = tokens # convert the three data fields into a set
                         input_data.append(data_set) # add the set to the data structure
         except:
             print('something went wrong with opening your data')

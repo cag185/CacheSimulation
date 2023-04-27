@@ -25,7 +25,6 @@ class Cache:
         # Calculate the number of bits needed for the block offset
         self.block_offset_bits = int(log2(block_size))
         self.cache_hierarchy = self.initialize_cache_hierarchy()
-
     def initialize_cache_hierarchy(self):
         # Initialize the cache hierarchy based on configuration parameters
         # and create data structures for cache layers
@@ -50,12 +49,12 @@ class Cache:
             cache_hierarchy.append(layer)
         return cache_hierarchy
     
-    def parse_address(self, address):
+    def parse_address(self, address, layer):
         address = int(address)
         # attempt another way to get tag
         address_len = len(str(address))
         # Calculate the number of bits needed for the index
-        index_bits = int(math.log2(self.cache_hierarchy[0]["num_sets"]))
+        index_bits = int(math.log2(layer["num_sets"]))
         s_size = int(index_bits) # the size of s (the set index)
         n_size = int(math.log2(self.block_size)) # the size of n (the block offset)
         m_n_s = int((address_len) - (s_size) - (n_size)) # gets the size of m-s-n (the tag)
@@ -65,10 +64,11 @@ class Cache:
         cache_set_index = str(address[m_n_s:s_size+m_n_s])
         block_offset = str(address[s_size: n_size+s_size])
         # convert the binary numbers into decimal
+        tagbin = tag
         tag = int(tag, 2)
         cache_set_index = int(cache_set_index, 2)
         block_offset = int(block_offset, 2)
-        return tag, cache_set_index, block_offset
+        return tag, cache_set_index, block_offset, tagbin
 
     def create_cache_block(self):
         return {
@@ -76,14 +76,16 @@ class Cache:
             "valid": False,
             "dirty": False,
             "lru_counter": 0,
-            "data": [0] * (self.block_size)  # Initialize the data field as a of the specified block size
+            "data": [0] * (self.block_size), # Initialize the data field as a of the specified block size
+            "tagBIN": 0
     }
     
-    def load_data_into_cache(self, layer, tag, cache_set_index, data):
+    def load_data_into_cache(self, layer, tag, cache_set_index, data, tagbin):
         """
         This function loads data into a cache set within a layer.
         """
         cache_set = layer["sets"][cache_set_index]
+        
         # Try to find an available (not valid) cache block
         available_block = None
         # find the block index where the LRU counter is highest
@@ -111,6 +113,7 @@ class Cache:
         available_block["dirty"] = False
         available_block["data"] = data
         available_block["lru_counter"] = 0
+        available_block["tagBIN"] = tagbin
 
     
     def read(self, address, main_memory):
@@ -120,7 +123,12 @@ class Cache:
         # ELSE, we have a miss, go to the next layer
     # basically want to track the hit rate of each layer per instruction
     # Calculate the tag, index, and offset from the address
-        tag, cache_set_index, block_offset = self.parse_address(address)
+        
+        for layer_idx, layer in enumerate(self.cache_hierarchy):
+        # Parse the address based on the current cache layer's configuration
+            tag, cache_set_index, block_offset, tagbin = self.parse_address(address, layer)
+    
+    
         access_latency = 0
         data = [0] * self.block_size
         hit_true = False
@@ -153,7 +161,7 @@ class Cache:
         if (hit_true):
             for layer in self.cache_hierarchy:
                 if not self.find_cache_block(tag, cache_set_index, layer):
-                    self.load_data_into_cache(layer, tag, cache_set_index, data)
+                    self.load_data_into_cache(layer, tag, cache_set_index, data, tagbin)
                 else:
                     break
         else:
@@ -163,14 +171,17 @@ class Cache:
 
             # Load data into all cache levels
             for layer in self.cache_hierarchy:
-                self.load_data_into_cache(layer, tag, cache_set_index, data)
+                self.load_data_into_cache(layer, tag, cache_set_index, data, tagbin)
 
         return data, access_latency
 
 
     def write(self, address, data, main_memory):
     # Implement write operation
-        tag, cache_set_index, block_offset = self.parse_address(address)
+    
+        for layer_idx, layer in enumerate(self.cache_hierarchy):
+            tag, cache_set_index, block_offset, tagbin = self.parse_address(address, layer)
+        
         write_hit = False
         for layer_idx, layer in enumerate(self.cache_hierarchy):
             # cache_block = None
@@ -201,7 +212,7 @@ class Cache:
         if not write_hit:
             if self.write_policy == "write-back" and self.allocation_policy == "write-allocate":
                 for layer in self.cache_hierarchy:
-                    self.load_data_into_cache(layer, tag, cache_set_index, data)
+                    self.load_data_into_cache(layer, tag, cache_set_index, data, tagbin)
 
             elif self.write_policy == "write-through" and self.allocation_policy == "non-write-allocate":
                 main_memory[address] = data
@@ -303,7 +314,7 @@ class Cache:
                     valid = cache_block['valid'] if cache_block['valid'] is not None else 'N/A'
                     dirty = cache_block['dirty'] if cache_block['dirty'] is not None else 'N/A'
                     lru_counter = cache_block['lru_counter'] if cache_block['lru_counter'] is not None else 'N/A'
-                    tag = cache_block['tag'] if cache_block['tag'] is not None else 'N/A'
+                    tag = cache_block['tagBIN'] if cache_block['tagBIN'] is not None else 'N/A'
                     print(f"{set_idx:10} | {block_idx:11} | {valid:5} | {dirty:5} | {lru_counter:11} | {tag:8}")
 
     def output_cache_HM_ratio(self):

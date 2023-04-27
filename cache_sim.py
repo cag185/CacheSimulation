@@ -113,7 +113,7 @@ def main():
             selected_file = file_list[0]
             with open(os.path.join(folder_path, selected_file), 'r') as f:
                 for line in f:
-                    tokens = line.split()
+                    tokens = line.strip().split()
                     if(len(tokens) == 3):
                         data_set = tokens # convert the three data fields into a set
                         input_data.append(data_set) # add the set to the data structure

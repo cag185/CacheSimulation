@@ -124,9 +124,8 @@ class Cache:
     # basically want to track the hit rate of each layer per instruction
     # Calculate the tag, index, and offset from the address
         
-        for layer_idx, layer in enumerate(self.cache_hierarchy):
-        # Parse the address based on the current cache layer's configuration
-            tag, cache_set_index, block_offset, tagbin = self.parse_address(address, layer)
+        
+          
     
     
         access_latency = 0
@@ -134,7 +133,9 @@ class Cache:
         hit_true = False
 
         layer_index = 0
-        for layer in (self.cache_hierarchy):  # Traverse from highest to lowest level
+        for layer in (self.cache_hierarchy): 
+            
+            tag, cache_set_index, block_offset, tagbin = self.parse_address(address, layer)# Traverse from highest to lowest level
             access_latency += layer["access_latency"]
             try:
                 cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer) 
@@ -179,13 +180,14 @@ class Cache:
     def write(self, address, data, main_memory):
     # Implement write operation
     
-        for layer_idx, layer in enumerate(self.cache_hierarchy):
-            tag, cache_set_index, block_offset, tagbin = self.parse_address(address, layer)
+       
         
+    
         write_hit = False
         for layer_idx, layer in enumerate(self.cache_hierarchy):
             # cache_block = None
             # cache_block_index = None
+            tag, cache_set_index, block_offset, tagbin = self.parse_address(address, layer)
             if(self.find_cache_block(tag, cache_set_index, layer)):
                 cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
             else:

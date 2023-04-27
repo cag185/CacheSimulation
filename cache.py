@@ -294,14 +294,14 @@ class Cache:
             print()  
             print(f"\t-------- Layer {layernum} --------")
             print()
+            print(f" set index | block index | valid | dirty | lru counter | tag ")
             for set_idx, cache_set in layer['sets'].items():
-                # print(f" set index |\t block index |\t valid |\t dirty |\t lru counter |\t tag ")
                 for block_idx, cache_block in enumerate(cache_set):
                     valid = cache_block['valid'] if cache_block['valid'] is not None else 'N/A'
                     dirty = cache_block['dirty'] if cache_block['dirty'] is not None else 'N/A'
                     lru_counter = cache_block['lru_counter'] if cache_block['lru_counter'] is not None else 'N/A'
                     tag = cache_block['tag'] if cache_block['tag'] is not None else 'N/A'
-                    print(f"{set_idx:3} | {block_idx:5} | {valid:5} | {dirty:5} | {lru_counter:10} | {tag:4}")
+                    print(f"{set_idx:10} | {block_idx:11} | {valid:5} | {dirty:5} | {lru_counter:11} | {tag:8}")
 
     def output_cache_HM_ratio(self):
         # this function specifically outputs the Hit to miss ratio of the cache

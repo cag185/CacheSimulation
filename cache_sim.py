@@ -4,20 +4,20 @@ from cache import Cache
 import os # module to open files from the system
 
 
-def get_cache_size():
-        size_str = input()
-        size_str = size_str.strip().lower()
-        
-        if size_str[-2:] == "kb" or size_str[:-2] == "KB":
-            size_bytes = int(size_str[:-2]) * 1024
-        elif size_str[-2:] == "mb" or size_str[:-2] == "MB":
-            size_bytes = int(size_str[:-2]) * 1024 * 1024
-        elif size_str[-2:] == "gb" or size_str[:-2] == "GB":
-            size_bytes = int(size_str[:-2]) * 1024 * 1024 * 1024
-        else:
-            size_bytes = int(size_str)
-            
-        return size_bytes
+def get_cache_size(size_str):
+    size_str = size_str.strip().lower()
+
+    if size_str[-2:] == "kb" or size_str[:-2] == "KB":
+        size_bytes = int(size_str[:-2]) * 1024
+    elif size_str[-2:] == "mb" or size_str[:-2] == "MB":
+        size_bytes = int(size_str[:-2]) * 1024 * 1024
+    elif size_str[-2:] == "gb" or size_str[:-2] == "GB":
+        size_bytes = int(size_str[:-2]) * 1024 * 1024 * 1024
+    else:
+        size_bytes = int(size_str)
+
+    return size_bytes
+
 
 # run the program
 def main():

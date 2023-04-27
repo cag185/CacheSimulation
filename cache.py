@@ -16,12 +16,12 @@ class Cache:
         self.read_finish_times = []
         self.read_finish_latencies = []
         self.block_size = block_size
-        memory_access_latency = 100
+        self.memory_access_latency = 100
 
         # cache hit/miss code variables
         # self.read_instruction_count = 0 # this is the variable to track the read instruction count
-        self.cache_layer_miss_count =  [] # this is a list to hold the number of misses in each cache layer as the read instructions are computed
-        self.cache_layer_hit_count = [] # this is a list to hold the number of hits in each cache layer as the read instructions are computed
+        self.cache_layer_miss_count =  [0] * num_layers# this is a list to hold the number of misses in each cache layer as the read instructions are computed
+        self.cache_layer_hit_count = [0] * num_layers# this is a list to hold the number of hits in each cache layer as the read instructions are computed
         
         # Calculate the number of bits needed for the block offset
         self.block_offset_bits = int(log2(block_size))
@@ -140,14 +140,14 @@ class Cache:
 
             if cache_block and cache_block["valid"]:
                 # Cache hit: store the data and exit the loop
-                cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
+                self.cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
                 data = cache_block["data"][block_offset]
                 self.update_lru(layer, cache_set_index, cache_block_index)
                 break
             
             # if the data not found in the curr cache layer
             else:
-                cache_layer_miss_count[layer_index] += 1
+                self.cache_layer_miss_count[layer_index] += 1
             # increase the counter
             layer_index += 1
 
@@ -243,8 +243,8 @@ class Cache:
             if(instructionChar == 'r'):
                 print('read instruction')
                 read_results = self.read(address, main_memory)
-                self.read_finish_times.append (arr_time + read_results.access_latency) # append the time taken to get a hit
-                self.read_finish_latencies.append(read_results.access_latency) # append the time taken to get a hit without the initial time
+                self.read_finish_times.append (int(arr_time) + read_results[1]) # append the time taken to get a hit
+                self.read_finish_latencies.append(read_results[1]) # append the time taken to get a hit without the initial time
                 # output
                 self.output_cache_status()
 
@@ -291,18 +291,19 @@ class Cache:
         # print the layers h/m ratio
         print('---The Hit to Miss ratio for each layer in the cache: ---')
         ratio_h_m = []
-        for x in range(self.cache_layer_hit_count):
-            # ratio of hits to misses = hitcount / misscount
-            ratio_h_m.append(self.cache_layer_hit_count[x] / self.cache_layer_miss_count[x])
+        for x in range(self.num_layers):
+            if self.cache_layer_miss_count[x] != 0:
+                ratio_h_m.append(self.cache_layer_hit_count[x] / self.cache_layer_miss_count[x])
+            else:
+                ratio_h_m.append('N/A')            
+                
             print('layer ${x}: ', ratio_h_m[x])
 
-        for layer_idx, layer in enumerate(self.cache_hierarchy):
-            print(f"Layer {layer_idx + 1}:")
-            print("Set | Block | Valid | Dirty | LRU Counter | Tag")
-
-            for set_idx, cache_set in layer["sets"].items():
+        for layernum, layer in enumerate(self.cache_hierarchy):  
+            for set_idx, cache_set in layer['sets'].items():
                 for block_idx, cache_block in enumerate(cache_set):
-                    print(f"{set_idx:3} | {block_idx:5} | {cache_block['valid']:5} | {cache_block['dirty']:5} | {cache_block['lru_counter']:10} | {cache_block['tag']:4}")
-
-            print("\n")
-
+                    valid = cache_block['valid'] if cache_block['valid'] is not None else 'N/A'
+                    dirty = cache_block['dirty'] if cache_block['dirty'] is not None else 'N/A'
+                    lru_counter = cache_block['lru_counter'] if cache_block['lru_counter'] is not None else 'N/A'
+                    tag = cache_block['tag'] if cache_block['tag'] is not None else 'N/A'
+                    print(f"{set_idx:3} | {block_idx:5} | {valid:5} | {dirty:5} | {lru_counter:10} | {tag:4}")

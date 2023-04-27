@@ -252,47 +252,10 @@ class Cache:
         # now the two lists should contain the counters of hits and misses per layer in the cache
         # Output the cache status after processing all instructionsAS
         self.output_cache_status()
-    
-    # def parse_input(self, input_stream,main_memory):
-    # # Iterate over the input stream line by line
-    #     for line in input_stream:
-    #         # Remove any leading/trailing whitespaces and split the line into components
-    #         components = line.strip().split()
-
-    #         # Get the instruction, address, and arrival time from the components
-    #         instruction = components[0]
-    #         address = int(components[1], 16)  # Assuming the address is in hexadecimal format
-    #         arrival_time = float(components[2])
-    #         data_to_write = components[3] if len(components) > 3 else None
-
-    #         # Process the instruction based on whether it's a read (r) or write (w) operation
-    #         if instruction == 'r':
-    #             print('read instruction')
-    #             data, access_latency = self.read(address, main_memory)
-    #             self.read_finish_times.append(arrival_time + access_latency)
-    #             self.read_finish_latencies.append(access_latency)
-    #             self.output_cache_status()
-
-    #         elif instruction == 'w':
-    #             print('write instruction')
-    #             # Replace 'data_to_write' with the appropriate data to write
-    #             self.write(address, data_to_write, main_memory)
-
-    # # Output the cache status after processing all instructions
-    #         self.output_cache_status()
-
 
     # Rather than print after every read, might be a better idea to save the delays and cache misses/hit ratio until all the instructions are read
     def output_cache_status(self):
-        # for each layer in the cache, we want to compute and print the layer hit/miss ratio
-        # print the layers h/m ratio
-        print('---The Hit to Miss ratio for each layer in the cache: ---')
-        ratio_h_m = []
-        for x in range(self.cache_layer_hit_count):
-            # ratio of hits to misses = hitcount / misscount
-            ratio_h_m.append(self.cache_layer_hit_count[x] / self.cache_layer_miss_count[x])
-            print('layer ${x}: ', ratio_h_m[x])
-
+        
         for layer_idx, layer in enumerate(self.cache_hierarchy):
             print(f"Layer {layer_idx + 1}:")
             print("Set | Block | Valid | Dirty | LRU Counter | Tag")
@@ -302,4 +265,15 @@ class Cache:
                     print(f"{set_idx:3} | {block_idx:5} | {cache_block['valid']:5} | {cache_block['dirty']:5} | {cache_block['lru_counter']:10} | {cache_block['tag']:4}")
 
             print("\n")
+    
+    def output_cache_HM_ratio(self):
+        # this function specifically outputs the Hit to miss ratio of the cache
+        # for each layer in the cache, we want to compute and print the layer hit/miss ratio
+        # print the layers h/m ratio
+        print('---The Hit to Miss ratio for each layer in the cache: ---')
+        ratio_h_m = []
+        for x in range(self.cache_layer_hit_count):
+            # ratio of hits to misses = hitcount / misscount
+            ratio_h_m.append(self.cache_layer_hit_count[x] / (self.cache_layer_miss_count[x] + self.cache_layer_hit_count[x])) # should compute hit/ (hit + miss)
+            print('layer ${x}: ', ratio_h_m[x])
 

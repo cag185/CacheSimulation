@@ -156,15 +156,16 @@ class Cache:
             access_latency += layer["access_latency"]
 
             try:
-                cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
+                cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer) 
+                if cache_block and cache_block["valid"]:
+                    # Cache hit: store the data and exit the loop
+                    self.cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
+                    data = cache_block["data"][block_offset]
+                    self.update_lru(layer, cache_set_index, cache_block_index)
+                    break
             except:
                     print("Miss!")
-            if cache_block and cache_block["valid"]:
-                # Cache hit: store the data and exit the loop
-                self.cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
-                data = cache_block["data"][block_offset]
-                self.update_lru(layer, cache_set_index, cache_block_index)
-                break
+           
             
             # if the data not found in the curr cache layer
             else:

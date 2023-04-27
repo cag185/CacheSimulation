@@ -154,16 +154,10 @@ class Cache:
         layer_index = 0
         for layer in reversed(self.cache_hierarchy):  # Traverse from highest to lowest level
             access_latency += layer["access_latency"]
-<<<<<<< HEAD
-            cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
-
-=======
-
             try:
                 cache_block, cache_block_index = self.find_cache_block(tag, cache_set_index, layer)
             except:
                     print("Miss!")
->>>>>>> peter_branch
             if cache_block and cache_block["valid"]:
                 # Cache hit: store the data and exit the loop
                 self.cache_layer_hit_count[layer_index] += 1 # increase the count of the hit at that layer
@@ -234,9 +228,6 @@ class Cache:
 
 
     def find_cache_block(self, tag, cache_set_index, layer):
-<<<<<<< HEAD
-        cache_set = layer["sets"][cache_set_index]
-=======
         
         try:
             cache_set = layer["sets"][cache_set_index]
@@ -247,7 +238,6 @@ class Cache:
         except:    
             return
 
->>>>>>> peter_branch
 
         for block_index, cache_block in enumerate(cache_set):
             if cache_block["valid"] and cache_block["tag"] == tag:

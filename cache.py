@@ -163,13 +163,11 @@ class Cache:
                     data = cache_block["data"][block_offset]
                     self.update_lru(layer, cache_set_index, cache_block_index)
                     break
+                # if the data not found in the curr cache layer
+                else:
+                    self.cache_layer_miss_count[layer_index] += 1
             except:
                     print("Miss!")
-           
-            
-            # if the data not found in the curr cache layer
-            else:
-                self.cache_layer_miss_count[layer_index] += 1
             # increase the counter
             layer_index += 1
 

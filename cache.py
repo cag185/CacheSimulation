@@ -231,13 +231,13 @@ class Cache:
 
     def find_cache_block(self, tag, cache_set_index, layer):
         
-        try:
+    
             cache_set = layer["sets"][cache_set_index]
 
             for block_index, cache_block in enumerate(cache_set):
                 if cache_block["valid"] and cache_block["tag"] == tag:
                     return block_index, cache_block
-        except:    
+           
             return
 
 
